@@ -1,0 +1,17 @@
+{
+  "name": "dada-study-review",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Controlled English recitation entry and review workflow",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "test:python": ".venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v",
+    "test:node": "node --test tests/test_coach_live_catalog.mjs tests/test_inbound_v3_workflow_hook.mjs tests/test_review_openclaw_replay.mjs && node --check runtime/inbound_v3_workflow_hook/index.mjs",
+    "test:offline": "./scripts/run-offline-tests.sh"
+  }
+}

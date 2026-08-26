@@ -1,0 +1,10 @@
+{
+  "contract_name": "dada.child_scope_mapping",
+  "contract_version": 1,
+  "scopes": [
+    {
+      "scope_token": "child_0123456789abcdef0123456789abcdef",
+      "assigned_agents": ["dada"]
+    }
+  ]
+}

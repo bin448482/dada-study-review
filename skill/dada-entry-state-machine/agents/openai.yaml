@@ -1,0 +1,6 @@
+interface:
+  display_name: "Dada v3 录入状态机"
+  short_description: "受控逐条英文审核与结构化建档结果"
+  default_prompt: "Use $dada-entry-state-machine only for a fixed dada.entry_state_machine_turn v1 request."
+policy:
+  allow_implicit_invocation: false

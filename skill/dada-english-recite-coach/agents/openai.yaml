@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dada 英文学习入口"
+  short_description: "在无活动状态识别录入或复习意图"
+  default_prompt: "Use $dada-english-recite-coach only for inactive child free chat and fixed v3 start requests."

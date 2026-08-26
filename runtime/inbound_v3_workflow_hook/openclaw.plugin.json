@@ -1,0 +1,23 @@
+{
+  "id": "dada-v3-workflow-inbound",
+  "name": "Dada v3 Workflow Inbound",
+  "description": "Routes statically authorized Dada child messages by the unified v3 workflow activity fact.",
+  "contracts": {"tools": ["dada_repetition_archive"]},
+  "configSchema": {
+    "type": "object", "additionalProperties": false,
+    "required": ["agentId", "childScopeToken", "pythonBin", "runtimeRoot", "archiveRoot", "entry", "review"],
+    "properties": {
+      "agentId": {"type": "string", "const": "dada"},
+      "childScopeToken": {"type": "string", "pattern": "^child_[a-f0-9]{32}$"},
+      "inboundBinding": {"$ref": "#/$defs/inboundBinding"},
+      "diagnostics": {"type": "object", "additionalProperties": false, "properties": {"inboundClaim": {"type": "boolean"}}},
+      "pythonBin": {"type": "string", "minLength": 1}, "runtimeRoot": {"type": "string", "minLength": 1}, "archiveRoot": {"type": "string", "minLength": 1},
+      "entry": {"$ref": "#/$defs/model"}, "review": {"$ref": "#/$defs/reviewModel"}
+    },
+    "$defs": {
+      "inboundBinding": {"type": "object", "additionalProperties": false, "required": ["sessionKey", "channelId", "accountId", "conversationId"], "properties": {"sessionKey": {"type": "string", "minLength": 1}, "channelId": {"type": "string", "minLength": 1}, "accountId": {"type": "string", "minLength": 1}, "conversationId": {"type": "string", "minLength": 1}}},
+      "model": {"type": "object", "additionalProperties": false, "required": ["definitionDirectory", "definitionDigest", "provider", "model", "endpoint", "apiStyle"], "properties": {"definitionDirectory": {"type": "string", "minLength": 1}, "definitionDigest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "provider": {"type": "string", "minLength": 1}, "model": {"type": "string", "minLength": 1}, "endpoint": {"type": "string", "pattern": "^https://"}, "apiStyle": {"type": "string", "enum": ["responses", "chat-completions"]}}},
+      "reviewModel": {"type": "object", "additionalProperties": false, "required": ["definitionDirectory", "definitionDigest", "provider", "model", "endpoint", "apiStyle", "schedulePath"], "properties": {"definitionDirectory": {"type": "string", "minLength": 1}, "definitionDigest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "provider": {"type": "string", "minLength": 1}, "model": {"type": "string", "minLength": 1}, "endpoint": {"type": "string", "pattern": "^https://"}, "apiStyle": {"type": "string", "enum": ["responses", "chat-completions"]}, "schedulePath": {"type": "string", "minLength": 1}}}
+    }
+  }
+}

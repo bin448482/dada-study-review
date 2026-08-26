@@ -1,0 +1,18 @@
+{
+  "policy_id": "dada.review.standard",
+  "policy_version": 3,
+  "initial_stage": 0,
+  "stages": [
+    {"stage": 0, "interval_seconds": 3600},
+    {"stage": 1, "interval_seconds": 10800},
+    {"stage": 2, "interval_seconds": 432000},
+    {"stage": 3, "interval_seconds": 2592000},
+    {"stage": 4, "interval_seconds": 2592000}
+  ],
+  "accuracy_bands": [
+    {"minimum": 0.0, "maximum": 0.6, "next_stage": 0},
+    {"minimum": 0.6, "maximum": 0.95, "next_stage": 1},
+    {"minimum": 0.95, "maximum": 1.0, "action": "advance"}
+  ],
+  "archive_after_stage": 4
+}

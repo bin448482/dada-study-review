@@ -1,0 +1,16 @@
+{
+  "contract_name": "dada.entry_state_machine_golden_suite",
+  "contract_version": 1,
+  "wall_clock_wait_seconds": 0,
+  "cases": [
+    {"id": "start_reply", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_start_records_full_ordered_trace_and_only_returns_after_checkpoint"},
+    {"id": "audit_material_and_reentry", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_audit_commit_creates_independent_active_material_and_reentry"},
+    {"id": "v2_audit_null_control_compatibility", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_v2_audit_accepts_only_null_reply_control_compatibility_fields"},
+    {"id": "contract_terminal_retry", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_two_invalid_model_attempts_end_with_persisted_retry_reply"},
+    {"id": "gateway_terminal_retry", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_two_gateway_failures_keep_collecting_with_persisted_retry_reply"},
+    {"id": "entry_unrelated_question_state_boundary", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_unrelated_question_in_entry_stays_collecting_with_state_boundary_guidance"},
+    {"id": "checkpoint_recovery", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_final_checkpoint_failure_suppresses_already_committed_reply"},
+    {"id": "pending_reentry_blocks_review", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_pending_reentry_blocks_review_with_exact_count_without_review_model_call"},
+    {"id": "entry_review_handoff", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_ready_entry_switches_to_first_locked_review_question"}
+  ]
+}

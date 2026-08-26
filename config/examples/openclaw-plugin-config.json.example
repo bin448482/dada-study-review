@@ -1,0 +1,30 @@
+{
+  "agentId": "dada",
+  "childScopeToken": "child_0123456789abcdef0123456789abcdef",
+  "inboundBinding": {
+    "sessionKey": "agent:dada:your-channel:your-account:your-conversation",
+    "channelId": "your-channel",
+    "accountId": "your-account",
+    "conversationId": "your-conversation"
+  },
+  "pythonBin": "/opt/dada/.venv/bin/python",
+  "runtimeRoot": "/opt/dada/runtime",
+  "archiveRoot": "/var/lib/dada/learning-archives",
+  "entry": {
+    "definitionDirectory": "/opt/dada/definitions/dada-entry-state-machine",
+    "definitionDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "provider": "your-provider",
+    "model": "your-model",
+    "endpoint": "https://provider.example/v1/responses",
+    "apiStyle": "responses"
+  },
+  "review": {
+    "definitionDirectory": "/opt/dada/definitions/dada-review-state-machine",
+    "definitionDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "provider": "your-provider",
+    "model": "your-model",
+    "endpoint": "https://provider.example/v1/responses",
+    "apiStyle": "responses",
+    "schedulePath": "/opt/dada/config/review-schedule.json"
+  }
+}

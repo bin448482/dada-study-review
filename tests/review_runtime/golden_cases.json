@@ -1,0 +1,32 @@
+{
+  "contract_name": "dada.review_state_machine_golden_suite",
+  "contract_version": 1,
+  "policy_file": "config/review-schedule.test.json",
+  "wall_clock_wait_seconds": 0,
+  "cases": [
+    {"id": "no_due_item", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_no_due_item_creates_no_workflow_or_gateway_call"},
+    {"id": "start_locks_question", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_start_locks_question_only_after_events_commit"},
+    {"id": "question_delivery_contains_locked_prompt", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_start_locks_question_only_after_events_commit"},
+    {"id": "blank_question_prompt_terminal_retry", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_two_blank_question_outputs_end_with_retry_reply_without_lock"},
+    {"id": "question_without_instruction", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_question_without_instruction_sends_prompt_only"},
+    {"id": "v2_question_contract_compatibility", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_v2_question_result_remains_readable_but_uses_locked_prompt_for_delivery"},
+    {"id": "multi_question_history", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_model_can_ask_a_second_question_with_same_workflow_history"},
+    {"id": "assessment_schedule", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_assessment_uses_policy_not_model_stage_and_closes"},
+    {"id": "formal_stage_1_to_4_full_cycle", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_formal_stage_one_through_four_full_cycle_archives_only_after_last_review"},
+    {"id": "formal_partial_and_incorrect_stage_resets", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_formal_partial_and_incorrect_answers_reset_each_stage_to_configured_short_interval"},
+    {"id": "assessment_advances_due_queue", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_assessment_advances_frozen_due_queue_and_asks_next_item"},
+    {"id": "exit_before_answer_keeps_queue_item_due", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_stop_before_answer_keeps_current_queue_item_uncompleted"},
+    {"id": "final_archive", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_final_policy_stage_archives_material"},
+    {"id": "revision_conflict", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_revision_conflict_keeps_original_lock_and_never_schedules"},
+    {"id": "review_unrelated_question_state_boundary", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_unrelated_input_repeats_locked_question_without_assessment_or_rescheduling"},
+    {"id": "gateway_failure_same_input_retry", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_gateway_failure_retries_once_without_asking_child_to_repeat"},
+    {"id": "contract_failure_same_input_retry", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_malformed_model_output_retries_once_without_asking_child_to_repeat"},
+    {"id": "stop_without_schedule", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_stop_releases_lock_without_rescheduling"},
+    {"id": "v3_stop_transition", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_v3_transition_stops_review_and_delivers_reply"},
+    {"id": "review_to_entry_freeze", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_switch_to_entry_freezes_question_and_creates_only_entry_active"},
+    {"id": "checkpoint_recovery", "test": "tests.review_runtime.test_review_runtime.ReviewRuntimeTests.test_missing_checkpoint_recovers_without_replaying_gateway"},
+    {"id": "entry_to_review_success", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_ready_entry_switches_to_first_locked_review_question"},
+    {"id": "entry_to_review_failure", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_entry_to_review_gateway_failure_keeps_collecting"},
+    {"id": "entry_to_paused_review_resume", "test": "tests.entry_runtime.test_entry_runtime.EntryRuntimeTests.test_entry_to_review_restores_paused_question_without_new_model_call"}
+  ]
+}
