@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "exporter_version": 1,
-  "inventory_sha256": "ed7288b09769073ea724fe4f665232e3425ed2841d2b482ee4fa79db63029914",
+  "inventory_sha256": "40da84050175775d5427b665865f4e9ab9cedc18dd3e59a40bf67cb4630f7238",
   "files": [
     ".github/workflows/offline.yml",
     ".gitignore",
@@ -15,6 +15,13 @@
     "config/review-schedule.json",
     "config/review-schedule.test.json",
     "docs/ARCHITECTURE.md",
+    "docs/ARCHITECTURE_DECISIONS.md",
+    "docs/DATA_AND_CONTRACT_REFERENCE.md",
+    "docs/DEVELOPMENT_AND_TESTING.md",
+    "docs/DOMAIN_AND_STATE_MODEL.md",
+    "docs/OPENCLAW_INTEGRATION.md",
+    "docs/PROJECT_OVERVIEW.md",
+    "docs/README.md",
     "package.json",
     "pyproject.toml",
     "requirements-v3-entry.txt",

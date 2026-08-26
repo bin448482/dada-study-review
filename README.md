@@ -29,4 +29,4 @@ The offline suite uses temporary SQLite databases and fake gateways. It does not
 
 Do not commit learning archives, session identifiers, API keys, cookies, delivery targets, or model request/response logs. The runtime deliberately keeps credentials out of SQLite events and checkpoint state, but operators remain responsible for their own host, backups, transport, and access controls.
 
-See [architecture notes](docs/ARCHITECTURE.md), [contributing](CONTRIBUTING.md), and [security reporting](SECURITY.md).
+Start with the [public documentation index](docs/README.md), then see [contributing](CONTRIBUTING.md) and [security reporting](SECURITY.md).

@@ -1,4 +1,4 @@
-# Architecture notes
+# Architecture
 
 The runtime separates deterministic program state from language-model decisions.
 
@@ -12,3 +12,5 @@ The runtime separates deterministic program state from language-model decisions.
 | `skill/` | Idle intent and Entry/Review state-machine LLM behavior definitions. |
 
 No source component should infer identity from chat text, let an LLM select a learning item, or use reference English for program-side automatic grading. A deployment must provide its own exact static identity mapping and must keep all real archive and credential material outside this repository.
+
+Read the [documentation index](README.md) for the domain model, contracts, decisions, development workflow, and optional OpenClaw integration.
