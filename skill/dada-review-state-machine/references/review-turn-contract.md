@@ -1,6 +1,6 @@
-# 固定回合合同
+# Fixed Turn Contract
 
-输入必须是：
+Input must be:
 
 ```json
 {
@@ -31,16 +31,13 @@
 }
 ```
 
-`start_review` 与 `next_question` 没有 `locked_question`；后者代表程序已按 assessment 推进到本次冻结队列的下一项，
-仍使用触发当前复习的孩子事件作为审计来源。`answer_question` 必有当前锁题。`history` 仅来自同一 workflow 的已提交事件，并带 event ID；它不是可访问的完整档案。
+`start_review` and `next_question` have no `locked_question`; the latter means the program advanced by assessment to the next item in the frozen queue and still uses the child event that triggered the current review as the audit source. `answer_question` always has the current locked question. `history` contains only committed events from the same workflow and includes event IDs; it is not a freely accessible full archive.
 
-`selected_question_mode` 由程序按 `learning_item.unit_type` 的固定允许池随机选择：单词为 `spelling`、`zh_to_en`、`en_to_zh`；短语为
-`zh_to_en`；句子为 `sentence_recall`、`zh_to_en`、`en_to_zh`。程序在本 workflow 已使用最少的候选中随机抽取，
-并在有其他候选时避免紧邻重复；它不生成题面或评分。`ask_question.question_mode` 必须与该字段完全相等。
+`selected_question_mode` is randomly selected by the program from the fixed pool for `learning_item.unit_type`: words use `spelling`, `zh_to_en`, or `en_to_zh`; phrases use `zh_to_en`; sentences use `sentence_recall`, `zh_to_en`, or `en_to_zh`. The program samples among candidates used least often in this workflow and avoids immediate repetition when alternatives exist; it does not generate prompts or scores. `ask_question.question_mode` must exactly equal this field.
 
-当 `locked_question.question_mode` 为单词 `spelling` 时，完整且正确的单词与空格、逗号、连字符或逐条消息分隔的逐字母拼写，都是可评估作答；正确时必须返回 `complete_assessment`。题面可邀请孩子拼写，但不得将逐字母输入作为唯一接受格式。未完成、无法判断或拼写错误时，才可用 `continue_locked_question` 保留锁题并作最小引导。
+When `locked_question.question_mode` is word `spelling`, a complete correct word and letter-by-letter spelling separated by spaces, commas, hyphens, or separate messages are all assessable answers; a correct answer must return `complete_assessment`. The prompt may invite spelling, but letter-by-letter input must not be the only accepted format. Use `continue_locked_question` with minimal guidance only for an incomplete, indeterminate, or misspelled answer.
 
-唯一输出为 `dada.review_state_machine_result` v4。首次或追问：
+The only output is `dada.review_state_machine_result` v4. Initial question or follow-up:
 
 ```json
 {
@@ -57,7 +54,7 @@
 }
 ```
 
-完成 assessment：
+Completed assessment:
 
 ```json
 {
@@ -81,10 +78,7 @@
 }
 ```
 
-字段必须精确匹配；禁止 unknown fields。`ask_question` 只能包含 `next_operation`、`question_mode` 和
-`question_json`；其中 question_json 只能有非空 `prompt`、可选非空 `instruction` 和可选非空 `speech_text`。Graph 将 prompt 原样放在可见消息
-最前，再附 instruction；因此 ask_question 不得带 `assistant_response`。翻译题不得带 `speech_text`；单词 `spelling` 与句子 `sentence_recall` 必须带 `speech_text`，它仅供语音合成，绝不显示给孩子。`complete_assessment` 不能带 `question_mode` 或
-`question_json`。无关输入或尚未作答时，保持同一锁题：
+Fields must match exactly; unknown fields are forbidden. `ask_question` may contain only `next_operation`, `question_mode`, and `question_json`; `question_json` may contain only a non-empty `prompt`, optional non-empty `instruction`, and optional non-empty `speech_text`. The Graph places `prompt` unchanged at the start of the visible message and then appends `instruction`; therefore `ask_question` must not include `assistant_response`. Translation questions must not include `speech_text`; word `spelling` and sentence `sentence_recall` must include it, for speech synthesis only and never for display to the child. `complete_assessment` cannot include `question_mode` or `question_json`. For unrelated input or an unanswered question, keep the same locked question:
 
 ```json
 {
@@ -97,9 +91,9 @@
 }
 ```
 
-`continue_locked_question` 只能含这两个字段。Graph 将持久化该引导并重发已提交的锁题；它不创建 assessment、排程、换题或修改队列。活动回合也可请求转换：
+`continue_locked_question` may contain only these two fields. The Graph persists the guidance and resends the committed locked question; it does not create an assessment, schedule, new question, or queue change. An active turn may also request a transition:
 
-对日期、天气或普通闲聊等无关输入，引导必须明确“现在正在复习”，请孩子先回答当前题，并说明其他问题可在复习结束后再问；不得回答该无关问题本身。
+For unrelated input such as dates, weather, or ordinary small talk, the guidance must explicitly say “现在正在复习”, ask the child to answer the current question first, and explain that other questions can be asked after review ends; do not answer the unrelated question itself.
 
 ```json
 {
@@ -113,9 +107,6 @@
 }
 ```
 
-`request_transition` 不能带题面或 assessment；它只是 LLM 的受控意图结果，Graph 必须验证当前状态后才可关闭或交接。权威程序校验位于 `runtime/v3_review/contracts/validation.py`；本参考不扩大合同。
+`request_transition` cannot include a prompt or assessment; it is only a controlled LLM intent result, and the Graph must validate the current state before closing or handing off. Authoritative program validation is in `runtime/v3_review/contracts/validation.py`; this reference does not expand the contract.
 
-`learning_item.review_context` 是 phrase 的可选受限对象：新建 phrase 必须提供 `schema_version`、`purpose_zh`、`context_kind`、
-`information_slots`、`prompt_constraint_zh`、非空 `accepted_expressions` 和可空 `semantic_alternatives`。目标形式示例只供模型生成和判断
-情境化 `zh_to_en`，不能直接作为题面答案泄露。历史未回填的 phrase 可以暂时为 `null`，按 legacy 题面兼容；新建 phrase 不得为 `null`。
-phrase 的 `zh_to_en` 题面必须提供足够的具体事实填充信息槽位；孩子用注册目标形式和一致的槽位值完成表达即可通过，不要求逐字复述模板。只说语义替代表达时应说明本题仍要练习目标短语；与题面事实矛盾或缺少关键槽位时不能完成 assessment。
+`learning_item.review_context` is an optional bounded object for phrases: a new phrase must provide `schema_version`, `purpose_zh`, `context_kind`, `information_slots`, `prompt_constraint_zh`, non-empty `accepted_expressions`, and nullable `semantic_alternatives`. Target-form examples are only for generating and judging contextualized `zh_to_en`; they must not leak the answer directly in the prompt. A historical phrase without backfill may temporarily be `null` for legacy prompt compatibility; a new phrase must not be `null`. A phrase `zh_to_en` prompt must provide enough concrete facts to fill the information slots; the child passes by using a registered target form with consistent slot values and need not repeat the template verbatim. If the child gives only a semantic alternative, explain that this question still practices the target phrase; an answer that conflicts with the prompt facts or omits a key slot cannot complete assessment.

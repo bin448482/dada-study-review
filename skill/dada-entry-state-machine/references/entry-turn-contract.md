@@ -1,6 +1,6 @@
-# 固定回合合同
+# Fixed Turn Contract
 
-输入必须是：
+Input must be:
 
 ```json
 {
@@ -14,9 +14,9 @@
 }
 ```
 
-`pending_reentry_requests` 始终是数组；每项仅含 `event_id`、`guidance` 与可空 `unit_type`。它不是完整历史，也不是可自由访问的档案。
+`pending_reentry_requests` is always an array; each item contains only `event_id`, `guidance`, and nullable `unit_type`. It is neither full history nor a freely accessible archive.
 
-唯一输出为 `dada.entry_state_machine_result` v3。普通 `reply_only`：
+The only output is `dada.entry_state_machine_result` v3. Ordinary `reply_only`:
 
 ```json
 {
@@ -74,16 +74,11 @@
 }
 ```
 
-字段必须精确匹配；禁止 unknown fields。`record_entry_audit` 只能包含示例中的 `assistant_response`、`next_operation` 和 `entry_audit`，不得附带 `guidance_kind` 或 `requested_transition`（运行时仅为已发布旧输出兼容两者都为 `null` 的情况）。v3 的 phrase 学习项必须增加 `review_context`，其结构必须符合 Review 上下文合同；word/sentence 学习项仍使用原字段。`start_entry` 不能返回 `record_entry_audit`，且 `guidance_kind` 与 `requested_transition` 必须都是 `null`。
-`collect_message` 的非审核引导只能返回 `reply_only` + `guidance_kind:"entry_guidance"`；自然完成意图只能返回 `reply_only` +
-`requested_transition` 仅可为 `"finish_entry"` 或 `"start_review"`，二者不能同时出现。它们都是 LLM 的受控请求，不是已发生的状态改变；Graph 必须二次验证并提交。`reentry_requests` 中每项只允许 `guidance` 和可空的 `unit_type`；
-`materials` 或 `reentry_requests` 至少一个非空。`resolved_reentry_request_ids` 只能引用输入中尚未解决的 ID，且不得重复。权威程序校验位于
-`runtime/v3_entry/contracts/validation.py`；本参考不扩大它的合同。
+Fields must match exactly; unknown fields are forbidden. `record_entry_audit` may contain only the example's `assistant_response`, `next_operation`, and `entry_audit`; do not add `guidance_kind` or `requested_transition` (the runtime accepts both as `null` only for compatibility with an already published legacy output). v3 phrase learning items must add `review_context` with the structure required by the Review context contract; word/sentence learning items retain the original fields. `start_entry` cannot return `record_entry_audit`, and both `guidance_kind` and `requested_transition` must be `null`.
+For `collect_message`, non-audit guidance may return only `reply_only` + `guidance_kind:"entry_guidance"`; a natural completion intent may return only `reply_only` + `requested_transition`, which may be only `"finish_entry"` or `"start_review"`, never both. These are controlled LLM requests, not completed state changes; the Graph must revalidate and commit them. Each `reentry_requests` item allows only `guidance` and nullable `unit_type`; at least one of `materials` or `reentry_requests` must be non-empty. `resolved_reentry_request_ids` may reference only unresolved IDs from the input and may not contain duplicates. Authoritative program validation is in `runtime/v3_entry/contracts/validation.py`; this reference does not expand the contract.
 
-日期、天气或普通闲聊等无关输入也属于 `entry_guidance`：回复必须明确“现在正在录入”，请孩子先继续发要学习的英文，并说明无关问题可在录入结束后再问；不得直接回答无关问题。
+Unrelated input such as dates, weather, or ordinary small talk is also `entry_guidance`: the reply must explicitly say “现在正在录入”, ask the child to continue sending the English to study, and explain that the unrelated question can be asked after entry ends; do not answer the unrelated question directly.
 
-普通拼写或语法问题需要孩子重录时，必须使用 `record_entry_audit`：`materials` 可以为空，但
-`reentry_requests` 至少含一条具体中文引导。不可用 `reply_only` 代替，否则补录任务不会成为可恢复的业务事实。
+When an ordinary spelling or grammar issue requires re-entry, `record_entry_audit` is required: `materials` may be empty, but `reentry_requests` must contain at least one specific Chinese instruction. Do not substitute `reply_only`, or the re-entry task will not become a recoverable business fact.
 
-`word` 和 `phrase` 可独立成为学习材料；不能把 `go to school` 这类短语误判为缺主语的句子。只有输入明确在尝试完整句且
-句子成分缺失时，才创建句子补录任务。
+`word` and `phrase` can independently be learning material; do not misclassify a phrase such as `go to school` as a sentence missing a subject. Create a sentence re-entry task only when the input clearly attempts a complete sentence and a sentence component is missing.
