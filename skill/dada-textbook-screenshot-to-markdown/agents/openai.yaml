@@ -1,0 +1,4 @@
+interface:
+  display_name: "Textbook Screenshot to Markdown"
+  short_description: "Transcribe textbook screenshots into page-split Markdown"
+  default_prompt: "Use $dada-textbook-screenshot-to-markdown to transcribe this Unit into page-split Markdown and hand it to the local Dialogue Unit candidate workflow."

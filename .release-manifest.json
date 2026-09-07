@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "exporter_version": 1,
-  "inventory_sha256": "b143075dd063f527f41dc687ccafd0b42c6acdf21725d0f74d9dc5f30ebb2244",
+  "inventory_sha256": "ca7144cef7a8d854109c3d02f6bac661941fc117814d0e39c2bcccac5dc122ac",
   "files": [
     ".github/workflows/offline.yml",
     ".gitignore",
@@ -141,6 +141,12 @@
     "skill/dada-review-state-machine/SKILL.md",
     "skill/dada-review-state-machine/agents/openai.yaml",
     "skill/dada-review-state-machine/references/review-turn-contract.md",
+    "skill/dada-textbook-markdown-to-unit-candidate/SKILL.md",
+    "skill/dada-textbook-markdown-to-unit-candidate/agents/openai.yaml",
+    "skill/dada-textbook-markdown-to-unit-candidate/references/unit-candidate-contract.md",
+    "skill/dada-textbook-screenshot-to-markdown/SKILL.md",
+    "skill/dada-textbook-screenshot-to-markdown/agents/openai.yaml",
+    "skill/dada-textbook-screenshot-to-markdown/references/transcription-rules.md",
     "tests/curriculum_pipeline/__init__.py",
     "tests/curriculum_pipeline/test_dialogue_unit_candidate.py",
     "tests/dialogue_production/__init__.py",

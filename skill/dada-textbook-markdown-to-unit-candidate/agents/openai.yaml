@@ -1,0 +1,4 @@
+interface:
+  display_name: "教材 Markdown 到 Dialogue Unit"
+  short_description: "根据页面教学内容设计 Dialogue Unit candidate"
+  default_prompt: "使用 $dada-textbook-markdown-to-unit-candidate，逐页逐区块盘点 Unit 主题、教学任务和语言材料，再设计并校验 Dialogue Unit candidate。"

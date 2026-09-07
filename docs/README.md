@@ -11,6 +11,6 @@ This documentation describes the reusable reference implementation. It deliberat
 7. [OpenClaw integration](OPENCLAW_INTEGRATION.md)
 8. [Optional TTS](TTS.md)
 
-The public runtime also includes the Dialogue workflow and its minimal versioned Unit package. Textbook screenshots, transcription inputs, candidate-generation history, and household curriculum data are not included.
+The public runtime also includes the Dialogue workflow and its minimal versioned Unit package. The public course-maintenance Skills describe how an operator supplies a separate textbook workspace and generates candidates; textbook screenshots, transcription inputs, candidate-generation history, and household curriculum data are not included.
 
 The included OpenClaw material is a generic integration reference, not a deployment recipe. Operators must supply their own static authorization mapping, archive location, model configuration, and secret handling.

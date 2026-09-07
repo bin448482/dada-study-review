@@ -10,7 +10,7 @@ The runtime separates deterministic program state from language-model decisions.
 | `v3_dialogue` | Controlled Dialogue Graph, versioned Unit loading, target progress, and injected credential-free model gateway port. |
 | `*_production` | Definition-digest verification plus injected HTTPS transport; credentials remain process environment only. |
 | `inbound_v3_workflow_hook` | Generic exact-static-session routing and production CLI process boundary. |
-| `skill/` | Idle intent and Entry/Review/Dialogue state-machine LLM behavior definitions. |
+| `skill/` | Idle intent, Entry/Review/Dialogue state-machine definitions, and the two course-maintenance Skills that produce page Markdown and Unit candidates. |
 
 No source component should infer identity from chat text, let an LLM select a learning item, or use reference English for program-side automatic grading. A deployment must provide its own exact static identity mapping and must keep all real archive and credential material outside this repository.
 
