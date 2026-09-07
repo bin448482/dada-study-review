@@ -33,6 +33,8 @@ Textbook images, private course workspaces, generated candidates, formal archive
 
 Requirements: Python 3.12+, Node.js 22.12+ with `node:sqlite`, and pnpm 9+.
 
+The repository scripts use Bash. Linux and macOS can run them directly; Windows requires Git Bash or WSL. Native PowerShell users should provide equivalent wrappers while keeping the same workspace configuration model rather than hard-coding Windows or Unix paths.
+
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -e .
