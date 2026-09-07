@@ -135,7 +135,11 @@ export function idleDueReminderPrompt(config, ctx, readActivity = readV3Workflow
 }
 function envFor(config, mode) {
   const model = config[mode]; const prefix = mode === "entry" ? "DADA_ENTRY" : mode === "review" ? "DADA_REVIEW" : "DADA_DIALOGUE";
-  const env = { ...process.env, PYTHONPATH: config.runtimeRoot, [`${prefix}_ARCHIVE_ROOT`]: config.archiveRoot, [`${prefix}_DEFINITION_DIR`]: model.definitionDirectory, [`${prefix}_DEFINITION_DIGEST`]: model.definitionDigest, [`${prefix}_MODEL_PROVIDER`]: model.provider, [`${prefix}_MODEL`]: model.model, [`${prefix}_MODEL_ENDPOINT`]: model.endpoint, [`${prefix}_MODEL_API_STYLE`]: model.apiStyle, [`${prefix}_MODEL_USER_AGENT`]: model.userAgent };
+  const env = { PYTHONPATH: config.runtimeRoot };
+  for (const key of ["PATH", "LANG", "LC_ALL", `${prefix}_MODEL_API_KEY`, "DADA_REVIEW_TTS_API_KEY"]) {
+    if (typeof process.env[key] === "string") env[key] = process.env[key];
+  }
+  Object.assign(env, { [`${prefix}_ARCHIVE_ROOT`]: config.archiveRoot, [`${prefix}_DEFINITION_DIR`]: model.definitionDirectory, [`${prefix}_DEFINITION_DIGEST`]: model.definitionDigest, [`${prefix}_MODEL_PROVIDER`]: model.provider, [`${prefix}_MODEL`]: model.model, [`${prefix}_MODEL_ENDPOINT`]: model.endpoint, [`${prefix}_MODEL_API_STYLE`]: model.apiStyle, [`${prefix}_MODEL_USER_AGENT`]: model.userAgent });
   if (mode === "review") {
     env.DADA_REVIEW_SCHEDULE_PATH = model.schedulePath; env.DADA_REVIEW_ENTRY_DEFINITION_DIR = config.entry.definitionDirectory; env.DADA_REVIEW_ENTRY_DEFINITION_DIGEST = config.entry.definitionDigest;
     const tts = normalizeReviewTts(config.reviewTts);

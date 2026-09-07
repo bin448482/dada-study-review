@@ -11,8 +11,8 @@
     "course_outputs": "outputs/course",
     "archive": "learning-archives",
     "media": "learning-archives/outbound-media",
-    "course_workspace": "../course-workspace",
-    "textbook_images": "../course-workspace"
+    "course_workspace": "../grade6-english-lesson-images",
+    "textbook_images": "../grade6-english-lesson-images"
   },
   "permissions": {
     "create_directories": true,
