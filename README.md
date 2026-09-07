@@ -1,16 +1,37 @@
 # Dada Study Review
 
-MIT-licensed reference implementation of a controlled English recitation entry and review workflow. The program owns archive state, frozen review queues, question locks, scheduling, and recovery; LLM definitions handle language review and child-facing feedback through structured contracts.
+MIT-licensed reference implementation for a controlled English learning workflow. Deterministic program code owns workflow state, learning records, frozen review queues, question locks, scheduling, recovery, and bounded persistence. State-machine Skills handle language review, question wording, semantic assessment, and child-facing feedback through versioned JSON contracts.
 
-## Included and excluded
+## What This Repository Provides
 
-This release includes the reusable Python runtime, Entry/Review/Dialogue state-machine Skill definitions, course-maintenance Skills for textbook transcription and Unit candidate generation, versioned review and Dialogue policies, a minimal public Unit package, generic OpenClaw inbound plugin source, and deterministic tests. It deliberately excludes learning archives, identities, credentials, deployed Skill mirrors, real model evaluation configuration, delivery targets, textbook images, private course workspaces, and household-specific operations.
+- Entry workflow for recording and auditing English learning material.
+- Review workflow with frozen due-item queues, locked questions, assessment, scheduling, and recovery.
+- Dialogue workflow with versioned Unit packages, target progress, scenarios, and review-point capture.
+- Textbook screenshot-to-Markdown course maintenance Skill.
+- Markdown-to-Dialogue-Unit candidate Skill with task audit, semantic review, validation, and immutable finalization.
+- Provider-neutral TTS boundary with bounded MP3 output and text fallback.
+- Generic OpenClaw inbound adapter source.
+- Deterministic Python and Node tests using temporary data and fake gateways.
 
-The OpenClaw plugin is source code only. Configure it with your own static identity mapping, storage directory, model endpoint, definition digests, and protected credentials. This repository provides no production deployment command and never supplies those values.
+## Course Content Pipeline
 
-## Quick start: offline verification
+The public course-maintenance workflow is:
 
-Requirements: Python 3.12+, Node.js 22.12+ (for `node:sqlite`), and pnpm 9+.
+```text
+textbook screenshots
+  -> page-split English Markdown
+  -> Unit candidate
+  -> task-audit and semantic-review
+  -> candidate validation
+  -> immutable Unit JSON
+  -> Dialogue targets and question intents
+```
+
+Textbook images, private course workspaces, generated candidates, formal archives, identities, credentials, and delivery targets are not included. Supply course inputs from a separate local workspace and keep generated course data outside this repository unless it is intentionally reviewed for publication.
+
+## Offline Verification
+
+Requirements: Python 3.12+, Node.js 22.12+ with `node:sqlite`, and pnpm 9+.
 
 ```bash
 python3 -m venv .venv
@@ -19,14 +40,20 @@ pnpm install
 pnpm run test:offline
 ```
 
-The offline suite uses temporary SQLite databases and fake gateways. It does not contact a model provider, OpenClaw Gateway, messaging channel, or a real learning archive.
+The offline suite uses temporary SQLite databases, synthetic scope data, and fake gateways. It does not contact model providers, TTS providers, OpenClaw Gateway, messaging channels, or a real learning archive.
 
-## Optional integration
+## Optional Integrations
 
-`config/examples/` contains anonymous shape-only examples for one static child scope and the OpenClaw plugin configuration. Copy them outside the repository, replace every example value, and keep credentials in your deployment secret store. Run `scripts/definition_digest.py` after changing a state-machine definition and configure the resulting digest in your own plugin configuration.
+The repository contains anonymous configuration examples for a static child scope, OpenClaw routing, and optional TTS. Copy examples outside the repository, replace every example value, and keep credentials in a protected secret store. Real LLM, TTS, OpenClaw, and channel tests are explicit opt-in operations and are not part of the default CI gate.
 
-## Security and privacy
+The OpenClaw adapter is source code only. It requires a deployment-owned static identity mapping, archive directory, model transport, definition digests, and protected credentials. This repository provides no production deployment command and never supplies those values.
 
-Do not commit learning archives, session identifiers, API keys, cookies, delivery targets, or model request/response logs. The runtime deliberately keeps credentials out of SQLite events and checkpoint state, but operators remain responsible for their own host, backups, transport, and access controls.
+## Boundaries
 
-Start with the [public documentation index](docs/README.md), then see [contributing](CONTRIBUTING.md) and [security reporting](SECURITY.md).
+This project is not a hosted service, a ready-to-run children’s application, a shared archive platform, a messaging bot deployment, or a model-weights distribution. Offline tests prove the reusable reference implementation only; they do not prove a live provider or channel deployment.
+
+## Security
+
+Do not commit learning archives, session identifiers, API keys, cookies, delivery targets, textbook images, private course workspaces, or model request/response logs. The runtime keeps credentials out of SQLite events and checkpoint state, but operators remain responsible for host security, backups, transport, and access control.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) for contribution and security guidance.
