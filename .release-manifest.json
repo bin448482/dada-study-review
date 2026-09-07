@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "exporter_version": 1,
-  "inventory_sha256": "17be4282687ffbec5645c0c26a8dd76f67f0e6eb5a6d369bf9c696b0b08e96fa",
+  "inventory_sha256": "e89d614e38ad348daab6c5f8cf11c4870ddeea98c506699db75f835467ec1501",
   "files": [
     ".github/workflows/offline.yml",
     ".gitignore",
@@ -120,6 +120,7 @@
     "scripts/check-public-release.sh",
     "scripts/definition_digest.py",
     "scripts/finalize-dialogue-unit-candidate.py",
+    "scripts/initialize-database.py",
     "scripts/run-offline-tests.sh",
     "scripts/run-tts-smoke.py",
     "scripts/validate-dialogue-unit-candidate.py",

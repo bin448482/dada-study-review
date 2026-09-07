@@ -44,6 +44,22 @@ pnpm run test:offline
 
 The offline suite uses temporary SQLite databases, synthetic scope data, and fake gateways. It does not contact model providers, TTS providers, OpenClaw Gateway, messaging channels, or a real learning archive.
 
+## Initialize a SQLite Archive
+
+After installing the dependencies, initialize a new archive with the public script:
+
+```bash
+./scripts/initialize-database.py
+```
+
+The script defaults to `<workspace archive>/workflow-v3.sqlite3`, as resolved from `config/workspace.json` or `config/workspace.example.json`. To choose an explicit path:
+
+```bash
+./scripts/initialize-database.py --database /path/to/workflow-v3.sqlite3
+```
+
+It creates or verifies the nine Dada business tables and the two LangGraph SQLite checkpoint tables, then runs `PRAGMA integrity_check` and `PRAGMA foreign_key_check`. The operation is idempotent and does not import learning material, create a child identity, or read credentials. Existing legacy archives require an explicit migration procedure; this command does not migrate or delete existing data. Entry, Review, and Dialogue services also call the same business-schema initializer when they start, while the standalone command makes the deployment step explicit.
+
 ## Optional Integrations
 
 The repository contains anonymous configuration examples for a static child scope, OpenClaw routing, and optional TTS. Copy examples outside the repository, replace every example value, and keep credentials in a protected secret store. Real LLM, TTS, OpenClaw, and channel tests are explicit opt-in operations and are not part of the default CI gate.
