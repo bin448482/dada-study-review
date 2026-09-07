@@ -14,6 +14,7 @@ from v3_workflow.persistence.repository import RepositoryError, WorkflowReposito
 from .contracts.review_turn import ReviewMachineTurn
 from .contracts.validation import ReviewContractError, render_locked_question, validate_review_state_machine_result
 from .gateway.port import ReviewModelGateway
+from .question_modes import select_question_mode
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,8 @@ class EntryReviewHandoffOutcome:
     reply_text: str
     last_event_id: str
     switched_to_review: bool = True
+    question_mode: str | None = None
+    question_json: dict[str, str] | None = None
 
 
 class EntryReviewHandoff:
@@ -45,18 +48,19 @@ class EntryReviewHandoff:
         item = preview["item"]
         review_id, review_child_event_id = str(uuid4()), str(uuid4())
         source_child_event_id = self._repository.get_latest_child_event_id(entry_workflow_id)
-        selected_question_mode = self._question_mode_selector(item["unit_type"], ())
+        selected_question_mode = select_question_mode(item["unit_type"], (), self._question_mode_selector)
         turn = ReviewMachineTurn(
-            "dada.review_state_machine_turn", 3, "start_review", "review_starting", review_id,
-            {"learning_item_id": item["learning_item_id"], "reference_text": item["reference_text"], "meaning_zh": item["meaning_zh"], "revision": item["revision"], "unit_type": item["unit_type"]},
+            "dada.review_state_machine_turn", 5, "start_review", "review_starting", review_id,
+            {"learning_item_id": item["learning_item_id"], "reference_text": item["reference_text"], "meaning_zh": item["meaning_zh"], "revision": item["revision"], "unit_type": item["unit_type"], "review_context": item.get("review_context")},
             selected_question_mode, {"event_id": review_child_event_id, "text": trigger_message}, None, (), False,
         )
         adapter = _HandoffModelTurnAdapter(
             self._repository, self._gateway, entry_workflow_id, review_id, review_child_event_id,
             source_child_event_id, self._system_prompt_snapshot, trigger_message, received_at, selected_question_mode,
+            str(item["learning_item_id"]), int(item["revision"]),
         )
         outcome = ModelTurnPipeline().run(
-            ModelTurnSpec(entry_workflow_id, source_child_event_id, received_at, "dada.review_state_machine_turn", 3, turn), adapter
+            ModelTurnSpec(entry_workflow_id, source_child_event_id, received_at, "dada.review_state_machine_turn", 5, turn), adapter
         )
         if outcome.infrastructure_failed or outcome.reply_text is None or outcome.last_event_id is None:
             return None
@@ -64,13 +68,21 @@ class EntryReviewHandoff:
             return EntryReviewHandoffOutcome(outcome.reply_text, outcome.last_event_id, False)
         if not self._checkpoint_waiting(review_id, external_session_ref, trigger_message, received_at):
             return None
-        return EntryReviewHandoffOutcome(outcome.reply_text, outcome.last_event_id)
+        metadata = outcome.metadata or {}
+        question = metadata.get("review_question")
+        return EntryReviewHandoffOutcome(
+            outcome.reply_text,
+            outcome.last_event_id,
+            True,
+            question.get("question_mode") if isinstance(question, dict) else None,
+            dict(question["question_json"]) if isinstance(question, dict) and isinstance(question.get("question_json"), dict) else None,
+        )
 
 
 class _HandoffModelTurnAdapter:
     """Buffers prospective review events until the atomic handoff commit."""
 
-    def __init__(self, repository: WorkflowRepository, gateway: ReviewModelGateway, entry_workflow_id: str, review_workflow_id: str, review_child_event_id: str, source_child_event_id: str, system_prompt: str, trigger_message: str, created_at: str, selected_question_mode: str) -> None:
+    def __init__(self, repository: WorkflowRepository, gateway: ReviewModelGateway, entry_workflow_id: str, review_workflow_id: str, review_child_event_id: str, source_child_event_id: str, system_prompt: str, trigger_message: str, created_at: str, selected_question_mode: str, expected_learning_item_id: str, expected_item_revision: int) -> None:
         self._repository = repository
         self._gateway = gateway
         self._entry_workflow_id = entry_workflow_id
@@ -81,6 +93,8 @@ class _HandoffModelTurnAdapter:
         self._trigger_message = trigger_message
         self._created_at = created_at
         self._selected_question_mode = selected_question_mode
+        self._expected_learning_item_id = expected_learning_item_id
+        self._expected_item_revision = expected_item_revision
         self._prepared: Any | None = None
         self._execution: Any | None = None
         self._pending_events: list[tuple[str, dict[str, Any], str]] = []
@@ -116,8 +130,10 @@ class _HandoffModelTurnAdapter:
             self._system_prompt, self._trigger_message, self._prepared.request, self._prepared.provider,
             self._prepared.model, {"output": self._execution.output, "internal_reasoning": self._execution.internal_reasoning},
             result.question_mode or "", result.question_json or {}, reply_text, self._created_at,
+            expected_learning_item_id=self._expected_learning_item_id,
+            expected_item_revision=self._expected_item_revision,
         )
-        return ModelTurnCommit(event_id, reply_text)
+        return ModelTurnCommit(event_id, reply_text, {"review_question": {"question_mode": result.question_mode, "question_json": dict(result.question_json or {})}})
 
     def commit_terminal_failure(self, failure_kind: FailureKind) -> ModelTurnCommit:
         del failure_kind

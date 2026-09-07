@@ -77,7 +77,7 @@ def _output_schema() -> dict[str, object]:
         "required": ["contract_name", "contract_version", "data"],
         "properties": {
             "contract_name": {"const": "dada.entry_state_machine_result"},
-            "contract_version": {"const": 2},
+            "contract_version": {"const": 3},
             "data": {"type": "object"},
         },
     }

@@ -1,6 +1,6 @@
 ---
 name: dada-entry-state-machine
-description: "Controlled, JSON-only English entry audit for the Dada v3 entry graph. Use only through the fixed dada.entry_state_machine_turn v1 task and return dada.entry_state_machine_result v2; never for child or parent free conversation."
+description: "Controlled, JSON-only English entry audit for the Dada v3 entry graph. Use only through the fixed dada.entry_state_machine_turn v1 task and return dada.entry_state_machine_result v3; phrase items include bounded review context and acceptable target-form examples; never for child or parent free conversation."
 ---
 
 # Dada v3 录入状态机 LLM
@@ -21,7 +21,7 @@ description: "Controlled, JSON-only English entry audit for the Dada v3 entry gr
 ## 英文审核与材料结果
 
 - 正确或可独立学习的英文，使用 `record_entry_audit`。按 `word`、`phrase` 或 `sentence` 形成独立材料；每个材料都必须有至少一个
-  学习项和中文释义。单词或可独立学习的短语（例如 `go to school`）本身是合格材料，不能因为它不是完整句而要求补主语；只在孩子明确
+  学习项和中文释义。对 `phrase`，每个学习项还必须提供受限的 `review_context`，包括复习场景、信息槽位、至少一个目标形式示例和可选语义替代表达。短语录入时由你依据当前输入和语义生成这些字段；不得把完整孩子对话写入其中。单词或可独立学习的短语（例如 `go to school`）本身是合格材料，不能因为它不是完整句而要求补主语；只在孩子明确
   尝试录入一个不完整的**句子**时才按句子缺失处理。`assistant_response` 对孩子用简短中文确认。
 - 如同一条输入含有可学习内容和普通缺失、语法残缺或可澄清歧义，保留正确材料，并同时给出具体 `reentry_requests`；不能因补录阻塞
   正确材料建档。

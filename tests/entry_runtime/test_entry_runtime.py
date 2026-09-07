@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 import sys
@@ -15,7 +16,7 @@ from v3_entry.contracts.validation import ContractError, validate_entry_state_ma
 from v3_entry.contracts.entry_turn import GatewayExecution
 from v3_entry.gateway import FakeModelGateway, GatewayError, audit_result, reply_only
 from v3_review import AuthorizedReviewIngress, ReviewTurnService
-from v3_review.gateway import FakeReviewModelGateway, question_result, transition_result
+from v3_review.gateway import FakeReviewModelGateway, assessment_result, question_result, transition_result
 from v3_workflow.policy.review_schedule import ReviewSchedulePolicy
 
 
@@ -62,6 +63,27 @@ def due_audit() -> dict:
     return value
 
 
+def phrase_context() -> dict:
+    return {
+        "schema_version": 1,
+        "purpose_zh": "报告相同的学校生活安排",
+        "context_kind": "shared_school_routine",
+        "information_slots": ["other_person_routine", "child_same_routine"],
+        "prompt_constraint_zh": "先给出同伴事实，再要求孩子报告相同情况。",
+        "accepted_expressions": [{"kind": "target_form", "text": "I go to school at {time}, too.", "note_zh": "保持目标表达。"}],
+        "semantic_alternatives": [],
+    }
+
+
+def phrase_audit_v3() -> dict:
+    value = due_audit()
+    value["contract_version"] = 3
+    value["data"]["resolved_reentry_request_ids"] = []
+    value["data"]["materials"][0].update({"unit_type": "phrase", "reference_text": "... too."})
+    value["data"]["materials"][0]["items"] = [{"reference_text": "... too.", "meaning_zh": "……也是如此。", "review_context": phrase_context()}]
+    return value
+
+
 def transition_reply(text: str, transition: str) -> GatewayExecution:
     return GatewayExecution(
         output={
@@ -74,6 +96,20 @@ def transition_reply(text: str, transition: str) -> GatewayExecution:
 
 def handoff_policy() -> ReviewSchedulePolicy:
     return ReviewSchedulePolicy.from_file(PROJECT / "config" / "review-schedule.test.json")
+
+
+def review_assessment(sequence: int, accuracy: float = 1.0) -> dict:
+    return {
+        "contract_name": "dada.review_assessment",
+        "contract_version": 1,
+        "data": {
+            "question_sequence": sequence,
+            "accuracy": accuracy,
+            "explanation": "模型判断说明",
+            "incorrect_words": [],
+            "feedback_basis": "根据本题作答",
+        },
+    }
 
 
 class EntryRuntimeTests(unittest.TestCase):
@@ -172,6 +208,20 @@ class EntryRuntimeTests(unittest.TestCase):
         self.assertIn("reentry_requested", [event["event_type"] for event in events])
         reentry = next(event for event in events if event["event_type"] == "reentry_requested")
         self.assertEqual(reentry["payload"]["guidance"], "请补充完整动作。")
+
+    def test_v3_phrase_audit_persists_review_context(self) -> None:
+        workflow_id = self.start()
+        output = GatewayExecution(output={
+            "contract_name": "dada.entry_state_machine_result", "contract_version": 3,
+            "data": {"assistant_response": "短语已保存。", "next_operation": "record_entry_audit", "entry_audit": phrase_audit_v3()},
+        })
+        self.gateway._executions.append(output)
+        self.handle("... too.", "2026-08-22T00:01:00Z")
+        with sqlite3.connect(self.path) as connection:
+            row = connection.execute("SELECT reference_text, review_context_json FROM learning_items").fetchone()
+        self.assertEqual(row[0], "... too.")
+        self.assertEqual(json.loads(row[1]), phrase_context())
+        self.assertEqual(self.service.repository.get_workflow(workflow_id)["phase"], "collecting")
 
     def test_recorded_material_reply_reports_program_owned_entry_count(self) -> None:
         workflow_id = self.start()
@@ -398,6 +448,59 @@ class EntryRuntimeTests(unittest.TestCase):
         self.assertEqual(review_gateway.prepared_turns[0].mode, "start_review")
         review_service.close()
 
+    def test_entry_to_review_freezes_all_due_items_and_continues_after_first_answer(self) -> None:
+        self.service.close()
+        review_gateway = FakeReviewModelGateway([
+            question_result("en_to_zh", {"prompt": "I go to school.", "instruction": "请回答中文意思。"}),
+            assessment_result("第一题答得不错。", review_assessment(1)),
+            question_result("zh_to_en", {"prompt": "我喜欢苹果。", "instruction": "请说出英文。"}),
+        ])
+        review_service = ReviewTurnService(
+            self.path, review_gateway, "复习提示", handoff_policy(), "固定系统提示", lambda unit_type, previous: "en_to_zh" if not previous else "zh_to_en"
+        )
+        self.service = EntryTurnService(self.path, self.gateway, "固定系统提示", review_service)
+        second = due_audit()
+        second["data"]["materials"][0].update({
+            "title": "苹果句子",
+            "reference_text": "I like apples.",
+            "items": [{"reference_text": "I like apples.", "meaning_zh": "我喜欢苹果。"}],
+        })
+        self.gateway._executions.extend([
+            reply_only("现在开始录入。"),
+            audit_result("第一条已保存。", due_audit()),
+            audit_result("第二条已保存。", second),
+            transition_reply("开始复习。", "start_review"),
+        ])
+        self.start()
+        self.handle("I go to school.", "2026-08-22T00:01:00Z")
+        self.handle("I like apples.", "2026-08-22T00:02:00Z")
+
+        started = self.handle("开始复习", "2026-08-22T01:02:00Z")
+        self.assertEqual(started.reply_text, "I go to school.\n\n请回答中文意思。")
+        review = review_service.repository.get_active_workflow("external-session-1", "review")
+        self.assertIsNotNone(review)
+        with sqlite3.connect(self.path) as connection:
+            queue = connection.execute(
+                "SELECT queue_position, learning_item_id, status FROM review_queue_items WHERE workflow_id = ? ORDER BY queue_position",
+                (review["workflow_id"],),
+            ).fetchall()
+        self.assertEqual(len(queue), 2)
+        self.assertEqual([row[0] for row in queue], [1, 2])
+        self.assertEqual([row[2] for row in queue], ["locked", "pending"])
+
+        continued = review_service.handle(AuthorizedReviewIngress("我去上学。", "2026-08-22T01:03:00Z", "external-session-1"))
+        self.assertEqual(continued.progress_text, "第 2 / 2 题，还剩 1 题。")
+        self.assertEqual(continued.reply_text, "第一题答得不错。\n\n我喜欢苹果。\n\n请说出英文。")
+        self.assertEqual(review_gateway.prepared_turns[1].mode, "answer_question")
+        self.assertEqual(review_gateway.prepared_turns[2].mode, "next_question")
+        with sqlite3.connect(self.path) as connection:
+            statuses = connection.execute(
+                "SELECT queue_position, status FROM review_queue_items WHERE workflow_id = ? ORDER BY queue_position",
+                (review["workflow_id"],),
+            ).fetchall()
+        self.assertEqual(statuses, [(1, "completed"), (2, "locked")])
+        review_service.close()
+
     def test_entry_to_review_gateway_failure_keeps_collecting(self) -> None:
         self.service.close()
         review_service = ReviewTurnService(self.path, FakeReviewModelGateway([GatewayError("offline")]), "复习提示", handoff_policy(), "固定系统提示", lambda _unit_type, _previous: "en_to_zh")
@@ -424,7 +527,7 @@ class EntryRuntimeTests(unittest.TestCase):
         self.start()
         self.handle("I go to school.", "2026-08-22T00:01:00Z")
         self.handle("结束录入", "2026-08-22T00:02:00Z")
-        self.assertEqual(review_service.handle(AuthorizedReviewIngress("开始复习", "2026-08-22T01:02:00Z", "external-session-1", True)).reply_text, "这轮有 1 题需要复习，现在还剩 1 题（含当前题）。\n\nI go to school.\n\n第一题。")
+        self.assertEqual(review_service.handle(AuthorizedReviewIngress("开始复习", "2026-08-22T01:02:00Z", "external-session-1", True)).reply_text, "I go to school.\n\n第一题。")
         review_id = review_service.repository.get_active_workflow("external-session-1", "review")["workflow_id"]
         review_gateway._executions.append(transition_result("开始录入。", "start_entry"))
         review_service.handle(AuthorizedReviewIngress("开始录入", "2026-08-22T01:03:00Z", "external-session-1"))

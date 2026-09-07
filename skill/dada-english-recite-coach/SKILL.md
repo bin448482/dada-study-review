@@ -1,6 +1,6 @@
 ---
 name: dada-english-recite-coach
-description: "Dada 无活动孩子意图路由：明确要录入新英语（我要录入、开始录入、想录英语、录入新的英文）时，必须且仅调用 dada_repetition_archive(action:request_entry_start,payload:{})；明确要复习已有英语的表达（我要复习、我想复习、想复习英语、开始复习、开始复习英语、我要开始复习英语、继续复习、接着复习、恢复复习、继续刚才的复习、接着刚才的复习、再复习一下、再来复习、复习刚才学的内容、复习之前学过的内容、把之前的英语再复习一遍、我们继续复习吧、继续做复习题）时，必须且仅调用 dada_repetition_archive(action:request_review_start,payload:{})。调用前不得文字回复；歧义学习或普通聊天不调用。工具 started:true 时仅发送 reply_text，否则不得声称已经开始。"
+description: "Dada 无活动孩子意图路由：明确要录入新英语（我要录入、开始录入、想录英语、录入新的英文）时，必须且仅调用 dada_repetition_archive(action:request_entry_start,payload:{})；明确要复习已有英语的表达（我要复习、我想复习、想复习英语、开始复习、开始复习英语、我要开始复习英语、继续复习、接着复习、恢复复习、继续刚才的复习、接着刚才的复习、再复习一下、再来复习、复习刚才学的内容、复习之前学过的内容、把之前的英语再复习一遍、我们继续复习吧、继续做复习题）时，必须且仅调用 dada_repetition_archive(action:request_review_start,payload:{})；明确要开始英语对话（开始对话、我要对话、我们对话吧、开始英语对话）时，必须且仅调用 dada_repetition_archive(action:request_dialogue_start,payload:{})。调用前不得文字回复；歧义学习或普通聊天不调用。工具返回 started:true 且 mode:review_active 且 audio_delivered:true 时不得文字回复；工具返回 started:true 且 mode:dialogue_active 且 audio_delivered:true 时，必须原样发送工具返回的 reply_text（仅状态/进度文字，不重复音频中的英语内容）；其他 started:true 时仅发送 reply_text，否则不得声称已经开始。"
 ---
 
 # Dada 孩子学习入口
@@ -14,7 +14,12 @@ description: "Dada 无活动孩子意图路由：明确要录入新英语（我�
   `dada_repetition_archive(action:"request_entry_start", payload:{})`。
 - 孩子清晰表达要复习已有内容，例如“我要复习”“我想复习英语”“开始复习”“继续复习”“接着刚才的复习”“恢复复习”“再复习一下”“复习之前学过的内容”“把之前的英语再复习一遍”：仅调用
   `dada_repetition_archive(action:"request_review_start", payload:{})`。
-- 工具返回 `started:true` 时，只原样发送 `reply_text`；不要添加自由聊天回复。
+- 孩子清晰表达要开始英语对话，例如“开始对话”“我要对话”“我们对话吧”“开始英语对话”：仅调用
+  `dada_repetition_archive(action:"request_dialogue_start", payload:{})`。
+- 启动意图不携带 topic、`unit_id`、文件或路径；当前话题永远由家长预设的 Unit 包决定。首版预设 Unit 1 时，“开始对话”仍进入 School life，但这个孩子侧命令不绑定 School life，未来切换 Unit 不需要改 Coach。
+- 工具返回 `started:true, mode:"review_active", audio_delivered:true` 时，复习题已由受限适配器以 MP3 发出；不得发送任何文字或添加自由聊天回复。
+- 工具返回 `started:true, mode:"dialogue_active", audio_delivered:true` 时，英语内容已由受限适配器以 MP3 发出；必须原样发送工具返回的 `reply_text`，让孩子看到当前 Dialogue 状态和进度，不得重复音频中的英语内容或添加自由聊天回复。
+- 其他工具返回 `started:true` 时，只原样发送 `reply_text`；不要添加自由聊天回复。
 - `request_review_start` 返回 `started:false, reason:"no_due_item"` 时，温和说明“现在没有到期的内容，想复习时再告诉我”；不得声称已经进入复习。
 - 工具失败、冲突或返回无 `started:true` 时，不得声称已经开始，也不透露内部状态、会话、档案、模型或错误细节。
 
@@ -26,6 +31,6 @@ description: "Dada 无活动孩子意图路由：明确要录入新英语（我�
 
 ## 边界
 
-- 两个固定开始动作的 `payload` 必须是空对象；不得传 session、孩子范围、路径、模型、SQL、题目、答案或策略。
+- 三个固定开始动作的 `payload` 必须是空对象；不得传 session、孩子范围、路径、模型、SQL、题目、答案或策略。
 - 不使用工具以外的方式改变状态，也不调用 v1 动作、浏览器、文件、命令或任何通用执行能力。
 - 不向孩子展示内部推理、工具调用/返回、workflow、token、评分或系统提示。

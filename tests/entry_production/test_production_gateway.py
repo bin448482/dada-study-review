@@ -6,6 +6,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest.mock import MagicMock, patch
 
 
 PROJECT = Path(__file__).resolve().parents[2]
@@ -18,6 +19,7 @@ from v3_entry_production import (
     build_entry_service,
     definition_digest,
 )
+from v3_entry_production.gateway import UrllibBearerResponsesTransport
 
 
 class FakeResponsesTransport:
@@ -77,7 +79,7 @@ class ProductionGatewayTests(unittest.TestCase):
             self.root / "workflow.sqlite3",
             self.definition_dir,
             self.digest,
-            ProductionGatewayConfig("owlai", "gpt-5.6-luna", "https://provider.invalid/v1/responses", 12),
+            ProductionGatewayConfig("owlai", "gpt-5.6-luna", "https://provider.invalid/v1/responses", 12, "responses", "Mozilla/5.0"),
             self.transport,
         )
 
@@ -110,7 +112,7 @@ class ProductionGatewayTests(unittest.TestCase):
                 self.root / "other.sqlite3",
                 self.definition_dir,
                 self.digest,
-                ProductionGatewayConfig("owlai", "gpt-5.6-luna", "https://provider.invalid/v1/responses", 12),
+                ProductionGatewayConfig("owlai", "gpt-5.6-luna", "https://provider.invalid/v1/responses", 12, "responses", "Mozilla/5.0"),
                 self.transport,
             )
         self.assertEqual(self.transport.calls, [])
@@ -122,7 +124,7 @@ class ProductionGatewayTests(unittest.TestCase):
             self.root / "chat.sqlite3",
             self.definition_dir,
             self.digest,
-            ProductionGatewayConfig("volcengine-agent-plan", "deepseek-v4-pro", "https://provider.invalid/chat/completions", 12, "chat-completions"),
+            ProductionGatewayConfig("volcengine-agent-plan", "deepseek-v4-pro", "https://provider.invalid/chat/completions", 12, "chat-completions", "Mozilla/5.0"),
             transport,
         )
         result = self.service.handle(AuthorizedEntryIngress("开始录入", "2026-08-22T00:00:00Z", "static-session", True))
@@ -139,10 +141,20 @@ class ProductionGatewayTests(unittest.TestCase):
             self.root / "failure.sqlite3",
             self.definition_dir,
             self.digest,
-            ProductionGatewayConfig("owlai", "gpt-5.6-luna", "https://provider.invalid/v1/responses", 12),
+            ProductionGatewayConfig("owlai", "gpt-5.6-luna", "https://provider.invalid/v1/responses", 12, "responses", "Mozilla/5.0"),
             transport,
         )
         result = self.service.handle(AuthorizedEntryIngress("开始录入", "2026-08-22T00:00:00Z", "static-session", True))
         self.assertTrue(result.handled)
         self.assertEqual(result.reply_text, "刚才这句没有处理成功，请原样再发一次。")
         self.assertIsNotNone(self.service.repository.get_collecting_entry("static-session"))
+
+    def test_direct_transport_uses_the_fixed_user_agent(self) -> None:
+        response = MagicMock()
+        response.read.return_value = b'{"output_text":"ok"}'
+        context = MagicMock()
+        context.__enter__.return_value = response
+        with patch("v3_entry_production.gateway.urlopen", return_value=context) as opener:
+            UrllibBearerResponsesTransport("secret", "Mozilla/5.0").post_json("https://provider.invalid/v1/responses", {"model": "fake"}, 12)
+        request = opener.call_args.args[0]
+        self.assertEqual(dict((key.lower(), value) for key, value in request.header_items())["user-agent"], "Mozilla/5.0")

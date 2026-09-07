@@ -1,0 +1,11 @@
+{
+  "provider": "minimax",
+  "enabled": false,
+  "endpoint": "https://api.minimaxi.com/v1/t2a_v2",
+  "model": "speech-2.8-turbo",
+  "voiceId": "your-approved-voice",
+  "timeoutSeconds": 20,
+  "maxTextChars": 500,
+  "maxAudioBytes": 5242880,
+  "retentionSeconds": 300
+}

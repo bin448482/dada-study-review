@@ -30,16 +30,16 @@ class FakeReviewModelGateway:
 
 
 def question_result(question_mode: str, question_json: dict[str, Any]) -> ReviewGatewayExecution:
-    return ReviewGatewayExecution({"contract_name": "dada.review_state_machine_result", "contract_version": 3, "data": {"next_operation": "ask_question", "question_mode": question_mode, "question_json": question_json}})
+    return ReviewGatewayExecution({"contract_name": "dada.review_state_machine_result", "contract_version": 4, "data": {"next_operation": "ask_question", "question_mode": question_mode, "question_json": question_json}})
 
 
 def locked_question_guidance_result(text: str) -> ReviewGatewayExecution:
-    return ReviewGatewayExecution({"contract_name": "dada.review_state_machine_result", "contract_version": 3, "data": {"next_operation": "continue_locked_question", "assistant_response": text}})
+    return ReviewGatewayExecution({"contract_name": "dada.review_state_machine_result", "contract_version": 4, "data": {"next_operation": "continue_locked_question", "assistant_response": text}})
 
 
 def assessment_result(text: str, assessment: dict[str, Any]) -> ReviewGatewayExecution:
-    return ReviewGatewayExecution({"contract_name": "dada.review_state_machine_result", "contract_version": 1, "data": {"next_operation": "complete_assessment", "assessment": assessment, "assistant_response": text}})
+    return ReviewGatewayExecution({"contract_name": "dada.review_state_machine_result", "contract_version": 4, "data": {"next_operation": "complete_assessment", "assessment": assessment, "assistant_response": text}})
 
 
 def transition_result(text: str, transition: str) -> ReviewGatewayExecution:
-    return ReviewGatewayExecution({"contract_name": "dada.review_state_machine_result", "contract_version": 3, "data": {"next_operation": "request_transition", "requested_transition": transition, "assistant_response": text}})
+    return ReviewGatewayExecution({"contract_name": "dada.review_state_machine_result", "contract_version": 4, "data": {"next_operation": "request_transition", "requested_transition": transition, "assistant_response": text}})

@@ -15,4 +15,4 @@ Dada Study Review is a controlled workflow for English recitation entry and revi
 - Identity is an integration concern and must come from an exact static mapping, never chat text.
 - Credentials, user content, delivery targets, and operational archives belong outside the source repository.
 
-The reference includes offline runtime tests and a generic inbound plugin. It does not include a ready-to-run household deployment, model credentials, or a messaging-channel configuration.
+The reference includes offline Entry, Review, and Dialogue runtime tests and a generic inbound plugin. It does not include a ready-to-run household deployment, model credentials, or a messaging-channel configuration.

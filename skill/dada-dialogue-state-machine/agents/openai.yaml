@@ -1,0 +1,6 @@
+interface:
+  display_name: "Dada v3 Dialogue 状态机"
+  short_description: "受控英语学校生活对话与结构化评估"
+  default_prompt: "Use $dada-dialogue-state-machine only for a fixed dada.dialogue_state_machine_turn v1 request."
+policy:
+  allow_implicit_invocation: false

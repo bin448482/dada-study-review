@@ -14,8 +14,13 @@ test("Coach frontmatter carries the fixed actions required by a no-read producti
   assert.match(description, /dada_repetition_archive/);
   assert.match(description, /request_entry_start/);
   assert.match(description, /request_review_start/);
+  assert.match(description, /request_dialogue_start/);
+  assert.match(description, /开始对话/);
+  assert.doesNotMatch(description, /学校生活对话/);
   assert.match(description, /payload:\{\}/);
   assert.match(description, /不得声称已经开始/);
+  assert.match(description, /mode:review_active.*audio_delivered:true.*不得文字回复/);
+  assert.match(description, /mode:dialogue_active.*audio_delivered:true.*必须原样发送.*reply_text/);
   assert.match(description, /我要开始复习英语/);
   for (const phrase of ["继续复习", "接着复习", "恢复复习", "继续刚才的复习", "再复习一下", "复习之前学过的内容"]) {
     assert.match(description, new RegExp(phrase));

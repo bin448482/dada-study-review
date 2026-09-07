@@ -175,9 +175,10 @@ class EntryRepository(WorkflowRepository):
             for item_order, item in enumerate(material.items, start=1):
                 connection.execute(
                     """INSERT INTO learning_items(learning_item_id, material_id, item_order, reference_text, meaning_zh,
-                       review_stage, next_review_at, completed_at, revision, created_at, updated_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 1, ?, ?)""",
+                       review_context_json, review_stage, next_review_at, completed_at, revision, created_at, updated_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, 1, ?, ?)""",
                     (str(uuid4()), material_id, item_order, item["reference_text"], item["meaning_zh"],
+                     None if item.get("review_context") is None else canonical_json(item["review_context"]),
                      None if is_parent_review else self._policy.initial_stage,
                      None if is_parent_review else self._policy.initial_due_at(timestamp), timestamp, timestamp),
                 )

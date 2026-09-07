@@ -1,0 +1,3510 @@
+{
+  "definition_schema_version": 3,
+  "unit_id": "grade6-english-unit-1-school-life",
+  "version": 6,
+  "title": "School life",
+  "source_pages": [
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "targets": [
+    {
+      "target_id": "subject_maths",
+      "target_type": "word",
+      "core": true,
+      "english": "Maths",
+      "meaning_zh": "数学",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 Maths 是课程表中的一门科目，并能围绕学校课程回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day",
+        "dream-school"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "subject_science",
+      "target_type": "word",
+      "core": true,
+      "english": "Science",
+      "meaning_zh": "科学",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 Science 是课程表中的一门科目，并能围绕学校课程回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "club-enquiry",
+        "school-day",
+        "dream-school"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "subject_history",
+      "target_type": "word",
+      "core": true,
+      "english": "History",
+      "meaning_zh": "历史",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 History 是课程表中的一门科目，并能围绕学校课程回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day",
+        "compare-school-lives"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "subject_geography",
+      "target_type": "word",
+      "core": true,
+      "english": "Geography",
+      "meaning_zh": "地理",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 Geography 是课程表中的一门科目，并能围绕学校课程回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day",
+        "compare-school-lives"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "subject_art",
+      "target_type": "word",
+      "core": false,
+      "english": "Art",
+      "meaning_zh": "美术",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 Art 是课程表中的一门科目，并能围绕学校课程回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "dream-school"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "subject_music",
+      "target_type": "word",
+      "core": false,
+      "english": "Music",
+      "meaning_zh": "音乐",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 Music 是课程表中的一门科目，并能围绕学校课程回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "dream-school"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "subject_ict",
+      "target_type": "word",
+      "core": false,
+      "english": "ICT",
+      "meaning_zh": "信息技术",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 ICT 是课程表中的一门科目，并能围绕学校课程回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "school-life-post",
+        "dream-school"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "subject_pe",
+      "target_type": "word",
+      "core": false,
+      "english": "PE",
+      "meaning_zh": "体育",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 PE 是课程表中的一门科目，并能围绕学校课程回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "timetable",
+      "target_type": "word",
+      "core": true,
+      "english": "timetable",
+      "meaning_zh": "课程表",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / timetable and subject labels"
+        }
+      ],
+      "semantic_focus": "理解 timetable 表示课程安排，并能说明自己的课程表。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "club",
+      "target_type": "word",
+      "core": true,
+      "english": "club",
+      "meaning_zh": "社团",
+      "source_pages": [
+        16
+      ],
+      "source_refs": [
+        {
+          "page": 16,
+          "raw_heading": "B1 Look and say",
+          "source_locator": "B1 Look and say / target club"
+        }
+      ],
+      "semantic_focus": "理解学校 club 的信息，并能围绕社团活动回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "experiment",
+      "target_type": "word",
+      "core": true,
+      "english": "experiment",
+      "meaning_zh": "实验",
+      "source_pages": [
+        15,
+        17
+      ],
+      "source_refs": [
+        {
+          "page": 15,
+          "raw_heading": "A3 Listen and take notes",
+          "source_locator": "A3 Listen and take notes / science lesson clue"
+        },
+        {
+          "page": 17,
+          "raw_heading": "B2 Listen, read and think",
+          "source_locator": "B2 Listen, read and think / club activity"
+        }
+      ],
+      "semantic_focus": "理解 experiment 表示科学课或社团中的实验活动，并能说明相关活动。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-day"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "do_projects",
+      "target_type": "phrase",
+      "core": true,
+      "english": "do projects",
+      "meaning_zh": "做项目",
+      "source_pages": [
+        19
+      ],
+      "source_refs": [
+        {
+          "page": 19,
+          "raw_heading": "Vocabulary focus",
+          "source_locator": "Vocabulary focus / target do projects"
+        }
+      ],
+      "semantic_focus": "理解 do projects 表示完成学习项目，并能自然说明学校中的项目活动。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-life-post",
+        "dream-school"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "在课堂或社团中说明正在完成的项目活动。",
+        "context_kind": "school_project_activity",
+        "information_slots": [
+          "project_activity"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We do projects in class.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "We do projects in the club.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "do_experiments",
+      "target_type": "phrase",
+      "core": true,
+      "english": "do experiments",
+      "meaning_zh": "做实验",
+      "source_pages": [
+        17
+      ],
+      "source_refs": [
+        {
+          "page": 17,
+          "raw_heading": "B2 Listen, read and think",
+          "source_locator": "B2 Listen, read and think / target do experiments"
+        }
+      ],
+      "semantic_focus": "理解 do experiments 表示进行实验，并能自然说明社团或课堂活动。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-day"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "先给出课堂或社团活动背景，再要求孩子说明进行实验。",
+        "context_kind": "experiment_activity",
+        "information_slots": [
+          "experiment_activity",
+          "place"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We do experiments in Science.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "We do experiments in the club.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "have_a_class",
+      "target_type": "phrase",
+      "core": true,
+      "english": "have a class",
+      "meaning_zh": "上课",
+      "source_pages": [
+        19
+      ],
+      "source_refs": [
+        {
+          "page": 19,
+          "raw_heading": "Vocabulary focus",
+          "source_locator": "Vocabulary focus / target have a class"
+        }
+      ],
+      "semantic_focus": "理解 have a class 表示上某一节课，并能结合时间或科目说明。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出科目和时间，要求孩子用完整句说明自己在该时间上课。",
+        "context_kind": "class_schedule",
+        "information_slots": [
+          "subject",
+          "time"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I have a {subject} class at {time}.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "We have a {subject} class on {day}.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "make_a_game",
+      "target_type": "phrase",
+      "core": false,
+      "english": "make a game",
+      "meaning_zh": "制作游戏",
+      "source_pages": [
+        19
+      ],
+      "source_refs": [
+        {
+          "page": 19,
+          "raw_heading": "Vocabulary focus",
+          "source_locator": "Vocabulary focus / target make a game"
+        }
+      ],
+      "semantic_focus": "理解 make a game 表示制作游戏，并能说明学校项目中的活动。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-life-post",
+        "dream-school"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出学校项目背景，要求孩子说明制作游戏这一活动。",
+        "context_kind": "project_activity",
+        "information_slots": [
+          "game_activity"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We make a game for our project.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "I make a game at school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "break",
+      "target_type": "word",
+      "core": true,
+      "english": "break",
+      "meaning_zh": "休息时间",
+      "source_pages": [
+        18
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / target break"
+        }
+      ],
+      "semantic_focus": "理解 break 表示两节课之间的休息时间，并能描述学校一天的安排。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "project",
+      "target_type": "word",
+      "core": true,
+      "english": "project",
+      "meaning_zh": "学习项目",
+      "source_pages": [
+        17
+      ],
+      "source_refs": [
+        {
+          "page": 17,
+          "raw_heading": "B2 Listen, read and think",
+          "source_locator": "B2 Listen, read and think / target project"
+        }
+      ],
+      "semantic_focus": "理解 project 是社团或课堂中的学习项目，并能说明相关活动。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-life-post",
+        "dream-school"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "take_a_lunch_break",
+      "target_type": "phrase",
+      "core": true,
+      "english": "take a lunch break",
+      "meaning_zh": "午餐休息",
+      "source_pages": [
+        18
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / target take a lunch break"
+        }
+      ],
+      "semantic_focus": "理解 take a lunch break 表示午餐休息，并能描述学校一天中的安排。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出学校日程中的午餐时间，要求孩子说明午餐休息安排。",
+        "context_kind": "school_day_routine",
+        "information_slots": [
+          "time"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I take a lunch break at {time}.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "We take a lunch break at {time}.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "go_outside_and_play",
+      "target_type": "phrase",
+      "core": false,
+      "english": "go outside and play",
+      "meaning_zh": "到户外玩耍",
+      "source_pages": [
+        18
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / target go outside and play"
+        }
+      ],
+      "semantic_focus": "理解 go outside and play 表示课间到户外活动，并能描述学校休息时间。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出课间背景，要求孩子说明到户外玩耍。",
+        "context_kind": "school_break_activity",
+        "information_slots": [
+          "break_activity"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We go outside and play at break time.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "I go outside and play at break time.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "ask_subjects",
+      "target_type": "sentence",
+      "core": true,
+      "english": "What are the subjects?",
+      "meaning_zh": "有哪些科目？",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / question 1"
+        }
+      ],
+      "semantic_focus": "理解询问课程表科目的问题，并能完整说明科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "compare_timetable",
+      "target_type": "sentence",
+      "core": true,
+      "english": "How is your timetable different from Lisa's?",
+      "meaning_zh": "你的课程表和 Lisa 的有什么不同？",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A1 Look and say",
+          "source_locator": "A1 Look and say / question 2"
+        }
+      ],
+      "semantic_focus": "理解比较两张课程表的问题，并能说明一个不同点。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "compare-school-lives"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "ask_for_club_information",
+      "target_type": "function",
+      "core": true,
+      "english": "ask for school club information politely",
+      "meaning_zh": "礼貌询问学校社团信息",
+      "source_pages": [
+        16,
+        17
+      ],
+      "source_refs": [
+        {
+          "page": 16,
+          "raw_heading": "B1 Look and say",
+          "source_locator": "B1 Look and say / target ask for school club information politely"
+        },
+        {
+          "page": 17,
+          "raw_heading": "B3 Role-play",
+          "source_locator": "B3 Role-play / target ask for school club information politely"
+        }
+      ],
+      "semantic_focus": "理解社团信息需求（人物、活动、时长、人数等），并能根据具体信息缺口选择合适的疑问词礼貌提问。",
+      "dialogue_evidence": "initiate_question",
+      "child_output_requirement": "ask",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "ask_stem_club",
+      "target_type": "sentence",
+      "core": true,
+      "english": "What does the STEM club do?",
+      "meaning_zh": "STEM 社团做什么？",
+      "source_pages": [
+        17
+      ],
+      "source_refs": [
+        {
+          "page": 17,
+          "raw_heading": "B2 Listen, read and think",
+          "source_locator": "B2 Listen, read and think / STEM club activity question"
+        },
+        {
+          "page": 17,
+          "raw_heading": "B3 Role-play",
+          "source_locator": "B3 Role-play / target What does the STEM club do?"
+        }
+      ],
+      "semantic_focus": "理解询问 STEM 社团活动的问题，并能在角色互动中主动提出语义正确的问题。",
+      "dialogue_evidence": "initiate_question",
+      "child_output_requirement": "ask",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "describe_school_day",
+      "target_type": "sentence",
+      "core": true,
+      "english": "What is your school day like?",
+      "meaning_zh": "你的学校一天是怎样的？",
+      "source_pages": [
+        18
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / target What is your school day like?"
+        }
+      ],
+      "semantic_focus": "理解描述学校一天的问题，并能完整说明课程、时间或活动。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "school_day_starts_ends",
+      "target_type": "sentence",
+      "core": true,
+      "english": "My school day starts at ... and ends at ...",
+      "meaning_zh": "我的学校一天在……开始，在……结束。",
+      "source_pages": [
+        22
+      ],
+      "source_refs": [
+        {
+          "page": 22,
+          "raw_heading": "D1 Think",
+          "source_locator": "D1 Think / target My school day starts at ... and ends at ..."
+        }
+      ],
+      "semantic_focus": "理解学校一天开始和结束时间的表达，并能用完整句说明自己的安排。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "compare_school_lives",
+      "target_type": "function",
+      "core": true,
+      "english": "compare two school lives with one similarity or difference",
+      "meaning_zh": "比较两种学校生活的一个相同点或不同点",
+      "source_pages": [
+        19
+      ],
+      "source_refs": [
+        {
+          "page": 19,
+          "raw_heading": "C5 Further thinking",
+          "source_locator": "C5 Further thinking / target compare two school lives with one similarity or difference"
+        }
+      ],
+      "semantic_focus": "理解比较学校生活的任务，并能说明一个相同点或不同点。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "compare-school-lives",
+        "school-life-post"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "express_preference_reason",
+      "target_type": "function",
+      "core": true,
+      "english": "express a school preference and give one reason",
+      "meaning_zh": "表达对学校生活的偏好并说明一个理由",
+      "source_pages": [
+        13,
+        18,
+        24
+      ],
+      "source_refs": [
+        {
+          "page": 13,
+          "raw_heading": "Big Question",
+          "source_locator": "Big Question / target express a school preference and give one reason"
+        },
+        {
+          "page": 18,
+          "raw_heading": "Personal touch",
+          "source_locator": "Personal touch / target express a school preference and give one reason"
+        },
+        {
+          "page": 24,
+          "raw_heading": "Read and think",
+          "source_locator": "Read and think / target express a school preference and give one reason"
+        }
+      ],
+      "semantic_focus": "理解表达学校偏好并说明理由的任务，并能完成个人化表达。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post",
+        "dream-school",
+        "compare-school-lives"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "state_online_safety_rule",
+      "target_type": "function",
+      "core": false,
+      "english": "state one safe rule for posting online",
+      "meaning_zh": "说明一条安全发布网络内容的规则",
+      "source_pages": [
+        23
+      ],
+      "source_refs": [
+        {
+          "page": 23,
+          "raw_heading": "TEEN skill",
+          "source_locator": "TEEN skill / target state one safe rule for posting online"
+        }
+      ],
+      "semantic_focus": "理解网络发布的安全提示，并能说明一条安全规则。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-safety-and-respect"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "describe_dream_school",
+      "target_type": "function",
+      "core": true,
+      "english": "describe a dream school idea and give one reason",
+      "meaning_zh": "描述一个理想学校想法并说明理由",
+      "source_pages": [
+        25
+      ],
+      "source_refs": [
+        {
+          "page": 25,
+          "raw_heading": "E Project",
+          "source_locator": "E Project / target describe a dream school idea and give one reason"
+        }
+      ],
+      "semantic_focus": "理解理想学校项目的表达任务，并能提出一个想法和理由。",
+      "dialogue_evidence": "interaction",
+      "child_output_requirement": "interact",
+      "scenario_ids": [
+        "dream-school"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "what_lesson_is_lisa_having",
+      "target_type": "sentence",
+      "core": true,
+      "english": "What lesson is Lisa having?",
+      "meaning_zh": "Lisa 正在上什么课？",
+      "source_pages": [
+        14
+      ],
+      "source_refs": [
+        {
+          "page": 14,
+          "raw_heading": "A2 Listen and think",
+          "source_locator": "A2 Listen and think / question about Lisa's lesson"
+        }
+      ],
+      "semantic_focus": "理解根据课堂线索询问正在上的课程，并能完整回答科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "identify_lesson_from_instructions",
+      "target_type": "function",
+      "core": true,
+      "english": "identify a lesson subject from classroom instructions",
+      "meaning_zh": "根据课堂指令识别课程科目",
+      "source_pages": [
+        15
+      ],
+      "source_refs": [
+        {
+          "page": 15,
+          "raw_heading": "A3 Listen and take notes",
+          "source_locator": "A3 Listen and take notes / key words and lesson subject"
+        }
+      ],
+      "semantic_focus": "听懂课堂指令中的关键词，并判断学生正在上的课程。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-day"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "ask_permission_about_club",
+      "target_type": "sentence",
+      "core": true,
+      "english": "Can/May I ask some questions about ...?",
+      "meaning_zh": "我可以询问一些关于……的问题吗？",
+      "source_pages": [
+        17
+      ],
+      "source_refs": [
+        {
+          "page": 17,
+          "raw_heading": "Asking for information",
+          "source_locator": "My learning notes / permission-to-ask frame"
+        }
+      ],
+      "semantic_focus": "理解礼貌开启社团信息询问的句型，并能在角色和信息缺口下主动使用。",
+      "dialogue_evidence": "initiate_question",
+      "child_output_requirement": "ask",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "ask_how_to_join_club",
+      "target_type": "sentence",
+      "core": true,
+      "english": "How can I join the ... club?",
+      "meaning_zh": "我怎样加入……社团？",
+      "source_pages": [
+        17
+      ],
+      "source_refs": [
+        {
+          "page": 17,
+          "raw_heading": "Asking for information",
+          "source_locator": "My learning notes / joining-a-club frame"
+        }
+      ],
+      "semantic_focus": "理解询问加入社团方法的句型，并能主动提出相关问题。",
+      "dialogue_evidence": "initiate_question",
+      "child_output_requirement": "ask",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "ask_club_capacity",
+      "target_type": "sentence",
+      "core": true,
+      "english": "How many students can join the ... club?",
+      "meaning_zh": "……社团可以有多少名学生参加？",
+      "source_pages": [
+        17
+      ],
+      "source_refs": [
+        {
+          "page": 17,
+          "raw_heading": "B2 Listen, read and think",
+          "source_locator": "B2 Listen, read and think / football club capacity question"
+        }
+      ],
+      "semantic_focus": "理解询问社团人数限制的问题，并能在信息缺口下主动提问。",
+      "dialogue_evidence": "initiate_question",
+      "child_output_requirement": "ask",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "ask_school_preference",
+      "target_type": "sentence",
+      "core": true,
+      "english": "What do you like most about your school?",
+      "meaning_zh": "你最喜欢学校的什么？",
+      "source_pages": [
+        13,
+        18,
+        25
+      ],
+      "source_refs": [
+        {
+          "page": 13,
+          "raw_heading": "Big Question",
+          "source_locator": "Big Question / school preference question"
+        },
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / online post question"
+        },
+        {
+          "page": 25,
+          "raw_heading": "Step 1: Collect ideas",
+          "source_locator": "Step 1 / school preference questions"
+        }
+      ],
+      "semantic_focus": "理解询问自己或他人学校最喜欢内容的问题，并能完整回答或说明理由。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post",
+        "dream-school",
+        "compare-school-lives"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "online_post",
+      "target_type": "word",
+      "core": false,
+      "english": "online post",
+      "meaning_zh": "网络帖子",
+      "source_pages": [
+        18
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "Text type: Online posts",
+          "source_locator": "Text type / post"
+        }
+      ],
+      "semantic_focus": "理解 online post 是分享学校生活信息的网络帖子。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "username",
+      "target_type": "word",
+      "core": false,
+      "english": "username",
+      "meaning_zh": "用户名",
+      "source_pages": [
+        18
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "Text type: Online posts",
+          "source_locator": "Text type / username"
+        }
+      ],
+      "semantic_focus": "理解 username 是网络帖子中显示发帖者身份的名称。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "emoji",
+      "target_type": "word",
+      "core": false,
+      "english": "emoji",
+      "meaning_zh": "表情符号",
+      "source_pages": [
+        18,
+        19
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "Text type: Online posts",
+          "source_locator": "Text type / emoji"
+        },
+        {
+          "page": 19,
+          "raw_heading": "C5 Further thinking",
+          "source_locator": "C5 Further thinking / emoji meaning"
+        }
+      ],
+      "semantic_focus": "理解 emoji 在网络帖子中传达情绪或态度的作用。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "present_simple_routines",
+      "target_type": "function",
+      "core": true,
+      "english": "describe routines and facts with the present simple",
+      "meaning_zh": "用一般现在时描述日常安排和事实",
+      "source_pages": [
+        20,
+        21
+      ],
+      "source_refs": [
+        {
+          "page": 20,
+          "raw_heading": "Grammar in use: Present simple",
+          "source_locator": "1 Read and think / starts, ends, have, goes, doesn't have"
+        },
+        {
+          "page": 21,
+          "raw_heading": "(2) Work in pairs",
+          "source_locator": "Do you ...? / school-life routines"
+        }
+      ],
+      "semantic_focus": "理解一般现在时表达现在事实、经常性活动和固定事实，并能描述学校生活安排。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-day",
+        "school-life-survey"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "do_you_school_routine",
+      "target_type": "sentence",
+      "core": true,
+      "english": "Do you ...?",
+      "meaning_zh": "你会……吗？/你……吗？",
+      "source_pages": [
+        21
+      ],
+      "source_refs": [
+        {
+          "page": 21,
+          "raw_heading": "(2) Work in pairs",
+          "source_locator": "Work in pairs / Do you ...? question frame"
+        }
+      ],
+      "semantic_focus": "理解用 Do you ...? 询问同伴学校生活习惯，并能在调查中主动提问。",
+      "dialogue_evidence": "initiate_question",
+      "child_output_requirement": "ask",
+      "scenario_ids": [
+        "school-life-survey"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "report_same_school_routine",
+      "target_type": "phrase",
+      "core": false,
+      "english": "... too.",
+      "meaning_zh": "……也是如此。",
+      "source_pages": [
+        21
+      ],
+      "source_refs": [
+        {
+          "page": 21,
+          "raw_heading": "(3) Report to the class",
+          "source_locator": "Report to the class / ... too"
+        }
+      ],
+      "semantic_focus": "理解用 too 报告自己与他人相同的学校生活情况。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-survey",
+        "compare-school-lives"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "先给出同伴的学校生活事实，再要求孩子报告自己的相同情况；题面不得直接泄露完整英文答案。",
+        "context_kind": "shared_school_routine",
+        "information_slots": [
+          "other_person_routine",
+          "child_same_routine"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I go to school at {time}, too.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "I play football every Friday, too.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": [
+          {
+            "text": "I go to school at the same time as my classmate.",
+            "use": "feedback_only",
+            "note_zh": "表达了相同语义，但没有练习 too；仅用于反馈。"
+          }
+        ]
+      }
+    },
+    {
+      "target_id": "report_different_school_routine",
+      "target_type": "phrase",
+      "core": false,
+      "english": "... but ...",
+      "meaning_zh": "……但是……",
+      "source_pages": [
+        21
+      ],
+      "source_refs": [
+        {
+          "page": 21,
+          "raw_heading": "(3) Report to the class",
+          "source_locator": "Report to the class / ... but ..."
+        }
+      ],
+      "semantic_focus": "理解用 but 报告自己与他人学校生活情况的差异。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-survey",
+        "compare-school-lives"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "先给出两个人不同的学校生活事实，再要求孩子用 but 报告差异；题面不得直接泄露完整英文答案。",
+        "context_kind": "contrasting_school_routine",
+        "information_slots": [
+          "other_person_routine",
+          "child_different_routine"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I go to school at {time}, but my classmate goes at {other_time}.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "I play football on Friday, but my classmate plays on Monday.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": [
+          {
+            "text": "My school life is different from my classmate’s.",
+            "use": "feedback_only",
+            "note_zh": "表达了差异语义，但没有练习 but；仅用于反馈。"
+          }
+        ]
+      }
+    },
+    {
+      "target_id": "write_school_life_reply",
+      "target_type": "function",
+      "core": true,
+      "english": "write a school-life reply with place, timetable, subjects and activities",
+      "meaning_zh": "用地点、日程、科目和活动写学校生活回复",
+      "source_pages": [
+        22,
+        23
+      ],
+      "source_refs": [
+        {
+          "page": 22,
+          "raw_heading": "D2 Prepare",
+          "source_locator": "D2 Prepare / timetable, subjects, activities, place"
+        },
+        {
+          "page": 23,
+          "raw_heading": "D4 Write",
+          "source_locator": "D4 Write / reply template"
+        }
+      ],
+      "semantic_focus": "理解学校生活回复需要组织哪些信息，并能按主题写出或口头组织多项信息。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "boat_school",
+      "target_type": "phrase",
+      "core": false,
+      "english": "boat school",
+      "meaning_zh": "船上学校",
+      "source_pages": [
+        24
+      ],
+      "source_refs": [
+        {
+          "page": 24,
+          "raw_heading": "Boat schools in Bangladesh",
+          "source_locator": "Boat schools / classrooms and school buses"
+        }
+      ],
+      "semantic_focus": "理解 boat school 是洪水期间兼作教室和校车的学校。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出洪水期间的学校背景，要求孩子说明 boat school 的作用。",
+        "context_kind": "school_culture_fact",
+        "information_slots": [
+          "flood_context",
+          "school_function"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "A boat school is a classroom and a school bus during floods.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "Boat schools help children learn during floods.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "earthquake_drill",
+      "target_type": "phrase",
+      "core": false,
+      "english": "earthquake drill",
+      "meaning_zh": "地震演练",
+      "source_pages": [
+        24
+      ],
+      "source_refs": [
+        {
+          "page": 24,
+          "raw_heading": "Schools in Japan",
+          "source_locator": "Schools in Japan / safety and earthquake drills"
+        }
+      ],
+      "semantic_focus": "理解 earthquake drill 是学校进行的安全演练活动。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出学校安全背景，要求孩子说明 earthquake drill 是什么活动。",
+        "context_kind": "school_safety_activity",
+        "information_slots": [
+          "safety_activity"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We have an earthquake drill at school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "An earthquake drill is a school safety activity.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "table_manners",
+      "target_type": "phrase",
+      "core": false,
+      "english": "table manners",
+      "meaning_zh": "餐桌礼仪",
+      "source_pages": [
+        24
+      ],
+      "source_refs": [
+        {
+          "page": 24,
+          "raw_heading": "Schools in France",
+          "source_locator": "Schools in France / good table manners"
+        }
+      ],
+      "semantic_focus": "理解 table manners 是在用餐时应遵守的礼仪。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出学校用餐背景，要求孩子说明用餐时需要遵守的 table manners。",
+        "context_kind": "school_meal_manners",
+        "information_slots": [
+          "meal_context"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We learn good table manners at school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "Good table manners are important at lunch.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "word_cloud",
+      "target_type": "word",
+      "core": true,
+      "english": "word cloud",
+      "meaning_zh": "词云",
+      "source_pages": [
+        25
+      ],
+      "source_refs": [
+        {
+          "page": 25,
+          "raw_heading": "Making a word cloud about my dream school",
+          "source_locator": "Project / word cloud tool"
+        }
+      ],
+      "semantic_focus": "理解 word cloud 是把想法按受欢迎程度可视化的工具。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "dream-school"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "make_a_word_cloud",
+      "target_type": "phrase",
+      "core": true,
+      "english": "make a word cloud",
+      "meaning_zh": "制作词云",
+      "source_pages": [
+        25
+      ],
+      "source_refs": [
+        {
+          "page": 25,
+          "raw_heading": "E Project",
+          "source_locator": "E Project / make a word cloud"
+        }
+      ],
+      "semantic_focus": "理解制作词云的项目任务，并能说明如何收集想法和生成结果。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "dream-school"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出理想学校项目背景，要求孩子说明制作词云的项目动作和结果。",
+        "context_kind": "dream_school_project",
+        "information_slots": [
+          "project_action",
+          "project_output"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We make a word cloud about our dream school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "I make a word cloud with my school ideas.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "collect_school_ideas",
+      "target_type": "function",
+      "core": true,
+      "english": "ask questions and collect school-life ideas",
+      "meaning_zh": "提问并收集学校生活想法",
+      "source_pages": [
+        25
+      ],
+      "source_refs": [
+        {
+          "page": 25,
+          "raw_heading": "Step 1: Collect ideas",
+          "source_locator": "Step 1 / ask questions and note answers"
+        }
+      ],
+      "semantic_focus": "理解项目中的调查目的，并能通过提问收集自己和他人对学校的想法。",
+      "dialogue_evidence": "interaction",
+      "child_output_requirement": "interact",
+      "scenario_ids": [
+        "dream-school"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "where_are_students",
+      "target_type": "sentence",
+      "core": false,
+      "english": "Where are the students?",
+      "meaning_zh": "学生们在哪里？",
+      "source_pages": [
+        13
+      ],
+      "source_refs": [
+        {
+          "page": 13,
+          "raw_heading": "Getting started",
+          "source_locator": "Getting started / question 1"
+        }
+      ],
+      "semantic_focus": "理解询问学生所在地点的问题，并能根据学校图片完整回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-introduction"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "what_are_students_doing",
+      "target_type": "sentence",
+      "core": false,
+      "english": "What are they doing there?",
+      "meaning_zh": "他们在那里做什么？",
+      "source_pages": [
+        13
+      ],
+      "source_refs": [
+        {
+          "page": 13,
+          "raw_heading": "Getting started",
+          "source_locator": "Getting started / question 2"
+        }
+      ],
+      "semantic_focus": "理解询问学生正在进行的学校活动，并能根据图片完整回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-introduction"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "ask_where_you_live",
+      "target_type": "sentence",
+      "core": false,
+      "english": "Where do you live?",
+      "meaning_zh": "你住在哪里？",
+      "source_pages": [
+        18
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / online post opening question"
+        }
+      ],
+      "semantic_focus": "理解在学校生活帖子中询问居住地的问题，并能完整回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "im_from_place",
+      "target_type": "sentence",
+      "core": false,
+      "english": "I'm from ...",
+      "meaning_zh": "我来自……",
+      "source_pages": [
+        18,
+        23
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / I'm from Espoo"
+        },
+        {
+          "page": 23,
+          "raw_heading": "D4 Write",
+          "source_locator": "D4 Write / I'm from template"
+        }
+      ],
+      "semantic_focus": "理解介绍自己所在地点的句型，并能在学校生活介绍中自然使用。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "what_is_an_online_post",
+      "target_type": "sentence",
+      "core": false,
+      "english": "What is an online post?",
+      "meaning_zh": "什么是网络帖子？",
+      "source_pages": [
+        18
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C1 Text type",
+          "source_locator": "C1 Text type / definition question"
+        }
+      ],
+      "semantic_focus": "理解询问网络帖子定义的问题，并能说明其基本用途或组成。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "what_is_special_about_school_life",
+      "target_type": "sentence",
+      "core": false,
+      "english": "What is special about Mikko's school life?",
+      "meaning_zh": "Mikko 的学校生活有什么特别之处？",
+      "source_pages": [
+        19
+      ],
+      "source_refs": [
+        {
+          "page": 19,
+          "raw_heading": "C3 General understanding",
+          "source_locator": "C3 General understanding / main idea question"
+        }
+      ],
+      "semantic_focus": "理解概括学校生活特点的问题，并能用完整回答说明核心信息。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "explain_emoji_meaning",
+      "target_type": "function",
+      "core": false,
+      "english": "explain what an emoji means in a post",
+      "meaning_zh": "解释帖子中表情符号的含义",
+      "source_pages": [
+        19
+      ],
+      "source_refs": [
+        {
+          "page": 19,
+          "raw_heading": "C5 Further thinking",
+          "source_locator": "C5 Further thinking / emoji meaning question"
+        }
+      ],
+      "semantic_focus": "理解表情符号在帖子中表达情绪或态度的功能，并能解释其含义。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "science_lesson",
+      "target_type": "phrase",
+      "core": false,
+      "english": "science lesson",
+      "meaning_zh": "科学课",
+      "source_pages": [
+        15
+      ],
+      "source_refs": [
+        {
+          "page": 15,
+          "raw_heading": "A3 Listen and take notes",
+          "source_locator": "A3 Listen and take notes / This is a science lesson"
+        }
+      ],
+      "semantic_focus": "理解 science lesson 表示一节科学课，并能根据课堂线索识别课程。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-day"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出课堂线索，要求孩子用 science lesson 说明这是科学课。",
+        "context_kind": "lesson_identification",
+        "information_slots": [
+          "lesson_clue"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "This is a science lesson.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "We are in a science lesson.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "calligraphy_club",
+      "target_type": "phrase",
+      "core": false,
+      "english": "Calligraphy Club",
+      "meaning_zh": "书法社团",
+      "source_pages": [
+        16
+      ],
+      "source_refs": [
+        {
+          "page": 16,
+          "raw_heading": "Calligraphy Club",
+          "source_locator": "Clubs noticeboard / Calligraphy Club"
+        }
+      ],
+      "semantic_focus": "理解 Calligraphy Club 是学校公告栏中的一个社团，并能询问或说明相关信息。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出公告栏或社团活动背景，要求孩子说明 Calligraphy Club 这一社团。",
+        "context_kind": "club_identity",
+        "information_slots": [
+          "club_name",
+          "club_activity"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I want to join the Calligraphy Club.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "The Calligraphy Club is at school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "stem_club",
+      "target_type": "phrase",
+      "core": false,
+      "english": "STEM Club",
+      "meaning_zh": "STEM 社团",
+      "source_pages": [
+        16
+      ],
+      "source_refs": [
+        {
+          "page": 16,
+          "raw_heading": "STEM Club",
+          "source_locator": "Clubs noticeboard / STEM Club"
+        }
+      ],
+      "semantic_focus": "理解 STEM Club 是学校公告栏中的一个社团，并能说明其活动。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出公告栏背景，要求孩子说明 STEM Club 及其活动。",
+        "context_kind": "club_identity",
+        "information_slots": [
+          "club_name",
+          "club_activity"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "The STEM Club does experiments.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "I want to join the STEM Club.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "football_club",
+      "target_type": "phrase",
+      "core": false,
+      "english": "Football Club",
+      "meaning_zh": "足球社团",
+      "source_pages": [
+        16
+      ],
+      "source_refs": [
+        {
+          "page": 16,
+          "raw_heading": "Football Club",
+          "source_locator": "Clubs noticeboard / Football Club"
+        }
+      ],
+      "semantic_focus": "理解 Football Club 是学校公告栏中的一个社团，并能询问其时间或参加信息。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出公告栏背景，要求孩子说明 Football Club 及其参加信息。",
+        "context_kind": "club_identity",
+        "information_slots": [
+          "club_name",
+          "club_time"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I want to join the Football Club.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "The Football Club is after school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "cooking_club",
+      "target_type": "phrase",
+      "core": false,
+      "english": "Cooking Club",
+      "meaning_zh": "烹饪社团",
+      "source_pages": [
+        16
+      ],
+      "source_refs": [
+        {
+          "page": 16,
+          "raw_heading": "Join the Cooking Club",
+          "source_locator": "Clubs noticeboard / Cooking Club"
+        }
+      ],
+      "semantic_focus": "理解 Cooking Club 是学校公告栏中的一个社团，并能询问或说明相关信息。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出公告栏背景，要求孩子说明 Cooking Club 及其活动。",
+        "context_kind": "club_identity",
+        "information_slots": [
+          "club_name",
+          "club_activity"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I want to join the Cooking Club.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "The Cooking Club makes food.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "greet_teacher_politely",
+      "target_type": "function",
+      "core": false,
+      "english": "greet a teacher politely",
+      "meaning_zh": "礼貌地问候老师",
+      "source_pages": [
+        16
+      ],
+      "source_refs": [
+        {
+          "page": 16,
+          "raw_heading": "TEEN skill: Greeting a teacher politely",
+          "source_locator": "TEEN skill / face-to-face and letter greeting"
+        }
+      ],
+      "semantic_focus": "理解面对面或书信中礼貌问候老师的交际功能，并能在角色互动中完成。",
+      "dialogue_evidence": "interaction",
+      "child_output_requirement": "interact",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "good_afternoon_teacher",
+      "target_type": "sentence",
+      "core": false,
+      "english": "Good afternoon, ...",
+      "meaning_zh": "下午好，……",
+      "source_pages": [
+        16
+      ],
+      "source_refs": [
+        {
+          "page": 16,
+          "raw_heading": "TEEN skill: Greeting a teacher politely",
+          "source_locator": "TEEN skill / face-to-face greeting frame"
+        }
+      ],
+      "semantic_focus": "理解面对面礼貌问候老师的句型，并能在社团询问角色中自然使用。",
+      "dialogue_evidence": "interaction",
+      "child_output_requirement": "interact",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "play_a_game",
+      "target_type": "phrase",
+      "core": false,
+      "english": "play a game",
+      "meaning_zh": "玩游戏",
+      "source_pages": [
+        18,
+        19
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / make a game and then play it"
+        },
+        {
+          "page": 19,
+          "raw_heading": "Vocabulary focus",
+          "source_locator": "Vocabulary focus / play verb collocation"
+        }
+      ],
+      "semantic_focus": "理解 play a game 表示进行游戏活动，并能说明学校项目中的活动。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-life-post",
+        "dream-school"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出学校项目或课间活动背景，要求孩子说明 play a game。",
+        "context_kind": "school_project_activity",
+        "information_slots": [
+          "game_activity"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We play a game at school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "I play a game with my classmates.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "go_to_school_at",
+      "target_type": "phrase",
+      "core": false,
+      "english": "go to school at ...",
+      "meaning_zh": "在……时间去上学",
+      "source_pages": [
+        21
+      ],
+      "source_refs": [
+        {
+          "page": 21,
+          "raw_heading": "(1) Work on your own",
+          "source_locator": "Work on your own / go to school at 7 a.m."
+        }
+      ],
+      "semantic_focus": "理解用时间说明上学安排的表达，并能描述自己的学校日常。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-life-survey",
+        "school-day"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出上学时间，要求孩子完整说明在该时间去上学。",
+        "context_kind": "school_start_routine",
+        "information_slots": [
+          "school_start_time"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I go to school at {time}.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "We go to school at {time}.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "go_to_club_after_school",
+      "target_type": "phrase",
+      "core": false,
+      "english": "go to the ... club after school",
+      "meaning_zh": "放学后去……社团",
+      "source_pages": [
+        21
+      ],
+      "source_refs": [
+        {
+          "page": 21,
+          "raw_heading": "(1) Work on your own",
+          "source_locator": "Work on your own / go to the science club after school"
+        }
+      ],
+      "semantic_focus": "理解用社团和时间说明课后活动的表达，并能描述学校生活。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-life-survey",
+        "club-enquiry"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出放学后的社团背景，要求孩子说明参加哪个社团以及时间。",
+        "context_kind": "after_school_club",
+        "information_slots": [
+          "club_name",
+          "after_school_time"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I go to the {club} club after school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "I go to the {club} club after school on {day}.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "play_football",
+      "target_type": "phrase",
+      "core": false,
+      "english": "play football",
+      "meaning_zh": "踢足球",
+      "source_pages": [
+        21
+      ],
+      "source_refs": [
+        {
+          "page": 21,
+          "raw_heading": "(1) Work on your own",
+          "source_locator": "Work on your own / play football every Friday"
+        }
+      ],
+      "semantic_focus": "理解 play football 表示参加足球活动，并能描述学校生活安排。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-life-survey",
+        "club-enquiry"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出学校生活安排，要求孩子说明参加足球活动的时间。",
+        "context_kind": "school_sport_routine",
+        "information_slots": [
+          "sport_time"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "I play football every Friday.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "We play football after school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "report_false_information_politely",
+      "target_type": "function",
+      "core": false,
+      "english": "correct false information politely",
+      "meaning_zh": "礼貌地纠正错误信息",
+      "source_pages": [
+        20
+      ],
+      "source_refs": [
+        {
+          "page": 20,
+          "raw_heading": "3 Practise: I'm afraid you're wrong!",
+          "source_locator": "Practise / correct false statements"
+        }
+      ],
+      "semantic_focus": "理解礼貌纠正错误陈述的交际功能，并能说明正确事实。",
+      "dialogue_evidence": "interaction",
+      "child_output_requirement": "interact",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": false
+    },
+    {
+      "target_id": "im_afraid_youre_wrong",
+      "target_type": "sentence",
+      "core": false,
+      "english": "I'm afraid you're wrong!",
+      "meaning_zh": "恐怕你错了！",
+      "source_pages": [
+        20
+      ],
+      "source_refs": [
+        {
+          "page": 20,
+          "raw_heading": "3 Practise: I'm afraid you're wrong!",
+          "source_locator": "Practise / correction opening"
+        }
+      ],
+      "semantic_focus": "理解礼貌纠正错误信息的开场句型，并能在互动中使用。",
+      "dialogue_evidence": "interaction",
+      "child_output_requirement": "interact",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "drill",
+      "target_type": "word",
+      "core": false,
+      "english": "drill",
+      "meaning_zh": "演练",
+      "source_pages": [
+        24
+      ],
+      "source_refs": [
+        {
+          "page": 24,
+          "raw_heading": "Word note",
+          "source_locator": "Word note / drill"
+        }
+      ],
+      "semantic_focus": "理解 drill 在学校安全语境中表示演练活动。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "serve_food_in_teams",
+      "target_type": "phrase",
+      "core": false,
+      "english": "serve food in teams",
+      "meaning_zh": "分组分餐",
+      "source_pages": [
+        24
+      ],
+      "source_refs": [
+        {
+          "page": 24,
+          "raw_heading": "Schools in Japan",
+          "source_locator": "Schools in Japan / serve food in teams"
+        }
+      ],
+      "semantic_focus": "理解 serve food in teams 表示学生分组轮流分餐的学校活动。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "reviewable": true,
+      "review_design": {
+        "schema_version": 1,
+        "purpose_zh": "给出学校午餐背景，要求孩子说明学生分组分餐这一活动。",
+        "context_kind": "school_meal_activity",
+        "information_slots": [
+          "meal_action",
+          "team_context"
+        ],
+        "prompt_constraint_zh": "使用具体教材范围内的信息填充槽位，要求孩子用完整英语产出目标短语；题面不得直接展示完整答案。",
+        "accepted_expressions": [
+          {
+            "kind": "target_form",
+            "text": "We serve food in teams at school.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          },
+          {
+            "kind": "target_form",
+            "text": "Students serve food in teams at lunch.",
+            "note_zh": "可替换槽位必须与题面事实一致，并保留目标短语的核心表达。"
+          }
+        ],
+        "semantic_alternatives": []
+      }
+    },
+    {
+      "target_id": "which_school_do_you_like_most",
+      "target_type": "sentence",
+      "core": false,
+      "english": "Which kind of school do you like most? Why?",
+      "meaning_zh": "你最喜欢哪种学校？为什么？",
+      "source_pages": [
+        24
+      ],
+      "source_refs": [
+        {
+          "page": 24,
+          "raw_heading": "Read and think",
+          "source_locator": "Read and think / preference question"
+        }
+      ],
+      "semantic_focus": "理解比较不同文化学校并选择偏好的问题，能说明一个学校特点和理由。",
+      "dialogue_evidence": "understand_and_respond",
+      "child_output_requirement": "respond",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "reviewable": true
+    },
+    {
+      "target_id": "have_classes_like",
+      "target_type": "sentence",
+      "core": false,
+      "english": "We have classes like ...",
+      "meaning_zh": "我们有……这样的课程。",
+      "source_pages": [
+        18,
+        20
+      ],
+      "source_refs": [
+        {
+          "page": 18,
+          "raw_heading": "C2 Read the post",
+          "source_locator": "C2 Read the post / We have classes like Maths, Dance and English"
+        },
+        {
+          "page": 20,
+          "raw_heading": "Grammar in use: Present simple",
+          "source_locator": "1 Read and think / have classes example"
+        }
+      ],
+      "semantic_focus": "理解用一般现在时介绍学校课程的句型，并能描述自己的课程。",
+      "dialogue_evidence": "semantic_expression",
+      "child_output_requirement": "describe",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "reviewable": true
+    }
+  ],
+  "question_intents": [
+    {
+      "intent_key": "subject_maths.primary",
+      "target_id": "subject_maths",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day",
+        "dream-school"
+      ],
+      "purpose": "引导孩子理解 Maths 并完整回答学校课程问题。",
+      "semantic_focus": "理解 Maths 是学校课程的一门科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "subject_science.primary",
+      "target_id": "subject_science",
+      "scenario_ids": [
+        "school-subjects",
+        "club-enquiry",
+        "school-day",
+        "dream-school"
+      ],
+      "purpose": "引导孩子理解 Science 并完整回答学校课程问题。",
+      "semantic_focus": "理解 Science 是学校课程的一门科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "subject_history.primary",
+      "target_id": "subject_history",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day",
+        "compare-school-lives"
+      ],
+      "purpose": "引导孩子理解 History 并完整回答学校课程问题。",
+      "semantic_focus": "理解 History 是学校课程的一门科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "subject_geography.primary",
+      "target_id": "subject_geography",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day",
+        "compare-school-lives"
+      ],
+      "purpose": "引导孩子理解 Geography 并完整回答学校课程问题。",
+      "semantic_focus": "理解 Geography 是学校课程的一门科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "subject_art.primary",
+      "target_id": "subject_art",
+      "scenario_ids": [
+        "school-subjects",
+        "dream-school"
+      ],
+      "purpose": "引导孩子理解 Art 并完整回答学校课程问题。",
+      "semantic_focus": "理解 Art 是学校课程的一门科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "subject_music.primary",
+      "target_id": "subject_music",
+      "scenario_ids": [
+        "school-subjects",
+        "dream-school"
+      ],
+      "purpose": "引导孩子理解 Music 并完整回答学校课程问题。",
+      "semantic_focus": "理解 Music 是学校课程的一门科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "subject_ict.primary",
+      "target_id": "subject_ict",
+      "scenario_ids": [
+        "school-subjects",
+        "school-life-post",
+        "dream-school"
+      ],
+      "purpose": "引导孩子理解 ICT 并完整回答学校课程问题。",
+      "semantic_focus": "理解 ICT 是学校课程的一门科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "subject_pe.primary",
+      "target_id": "subject_pe",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day"
+      ],
+      "purpose": "引导孩子理解 PE 并完整回答学校课程问题。",
+      "semantic_focus": "理解 PE 是学校课程的一门科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "timetable.primary",
+      "target_id": "timetable",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day"
+      ],
+      "purpose": "引导孩子理解 timetable 并说明课程安排。",
+      "semantic_focus": "理解课程表表示学校课程安排。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材课程表问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "club.primary",
+      "target_id": "club",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-life-post"
+      ],
+      "purpose": "引导孩子理解学校社团并完整回答相关问题。",
+      "semantic_focus": "理解 school club 的基本信息。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用社团海报信息或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "experiment.primary",
+      "target_id": "experiment",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-day"
+      ],
+      "purpose": "引导孩子根据课堂线索理解 experiment。",
+      "semantic_focus": "理解 experiment 与科学活动的关系。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用课堂线索问题，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "do_projects.primary",
+      "target_id": "do_projects",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-life-post",
+        "dream-school"
+      ],
+      "purpose": "引导孩子说明学校项目活动。",
+      "semantic_focus": "理解 do projects 的活动语义。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕教材项目活动提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "do_experiments.primary",
+      "target_id": "do_experiments",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-day"
+      ],
+      "purpose": "引导孩子说明社团或课堂实验活动。",
+      "semantic_focus": "理解 do experiments 的活动语义。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕教材实验活动提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "have_a_class.primary",
+      "target_id": "have_a_class",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day"
+      ],
+      "purpose": "引导孩子说明某门课或上课时间。",
+      "semantic_focus": "理解 have a class 的学校日常语义。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕课程或时间提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "make_a_game.primary",
+      "target_id": "make_a_game",
+      "scenario_ids": [
+        "school-life-post",
+        "dream-school"
+      ],
+      "purpose": "引导孩子说明项目中制作游戏的活动。",
+      "semantic_focus": "理解 make a game 的项目活动语义。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕项目活动提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "break.primary",
+      "target_id": "break",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "purpose": "引导孩子理解学校休息时间并完整回答。",
+      "semantic_focus": "理解 break 是两节课之间的休息时间。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用学校一天的安排问题，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "project.primary",
+      "target_id": "project",
+      "scenario_ids": [
+        "club-enquiry",
+        "school-life-post",
+        "dream-school"
+      ],
+      "purpose": "引导孩子理解学习项目并完整回答。",
+      "semantic_focus": "理解 project 是学校或社团中的学习项目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用社团或学校项目问题，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "take_a_lunch_break.primary",
+      "target_id": "take_a_lunch_break",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "purpose": "引导孩子描述午餐休息安排。",
+      "semantic_focus": "理解 take a lunch break 的日程语义。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕学校一天的安排提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "go_outside_and_play.primary",
+      "target_id": "go_outside_and_play",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "purpose": "引导孩子描述课间户外活动。",
+      "semantic_focus": "理解 go outside and play 的课间活动语义。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕学校休息时间提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "ask_subjects.primary",
+      "target_id": "ask_subjects",
+      "scenario_ids": [
+        "school-subjects"
+      ],
+      "purpose": "引导孩子理解科目问题并完整回答。",
+      "semantic_focus": "理解课程表中科目询问的语义。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "compare_timetable.primary",
+      "target_id": "compare_timetable",
+      "scenario_ids": [
+        "school-subjects",
+        "compare-school-lives"
+      ],
+      "purpose": "引导孩子比较两张课程表。",
+      "semantic_focus": "理解课程表不同点比较。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材比较问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "ask_for_club_information.primary",
+      "target_id": "ask_for_club_information",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子主动礼貌询问社团信息。",
+      "semantic_focus": "根据人物、活动、时长或人数等信息缺口选择问题维度，并礼貌询问社团信息。",
+      "dialogue_evidence": "initiate_question",
+      "prompt_constraint": "设置社团老师角色、想了解或加入社团的真实目的和信息缺口，允许孩子围绕人物、活动、时长或人数组织自然问题，不给完整教材问句支架。"
+    },
+    {
+      "intent_key": "ask_stem_club.primary",
+      "target_id": "ask_stem_club",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子主动询问 STEM 社团活动。",
+      "semantic_focus": "理解 STEM 社团活动的信息需求。",
+      "dialogue_evidence": "initiate_question",
+      "prompt_constraint": "设置社团老师角色、想了解活动的目的和信息缺口，不给完整教材问句支架。"
+    },
+    {
+      "intent_key": "describe_school_day.primary",
+      "target_id": "describe_school_day",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "purpose": "引导孩子理解学校一天的问题并完整回答。",
+      "semantic_focus": "理解学校一天的课程、时间和活动。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用教材学校一天问题或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "school_day_starts_ends.primary",
+      "target_id": "school_day_starts_ends",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "purpose": "引导孩子说明学校一天的开始和结束时间。",
+      "semantic_focus": "理解学校日程时间表达。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕学校时间安排提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "compare_school_lives.primary",
+      "target_id": "compare_school_lives",
+      "scenario_ids": [
+        "compare-school-lives",
+        "school-life-post"
+      ],
+      "purpose": "引导孩子比较两种学校生活。",
+      "semantic_focus": "理解相同点或不同点比较。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕教材比较任务提问，要求孩子用完整回答表达一个相同点或不同点。"
+    },
+    {
+      "intent_key": "express_preference_reason.primary",
+      "target_id": "express_preference_reason",
+      "scenario_ids": [
+        "school-life-post",
+        "dream-school",
+        "compare-school-lives"
+      ],
+      "purpose": "引导孩子表达学校偏好并说明理由。",
+      "semantic_focus": "理解偏好与理由的表达关系。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕个人学校偏好提问，要求孩子用完整回答表达偏好和理由。"
+    },
+    {
+      "intent_key": "state_online_safety_rule.primary",
+      "target_id": "state_online_safety_rule",
+      "scenario_ids": [
+        "school-safety-and-respect"
+      ],
+      "purpose": "引导孩子说明网络发布安全规则。",
+      "semantic_focus": "理解安全发布网络内容的规则。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕安全发布提示提问，要求孩子用完整回答说明一条规则。"
+    },
+    {
+      "intent_key": "describe_dream_school.primary",
+      "target_id": "describe_dream_school",
+      "scenario_ids": [
+        "dream-school"
+      ],
+      "purpose": "引导孩子在互动中描述理想学校想法和理由。",
+      "semantic_focus": "理解理想学校项目的表达任务。",
+      "dialogue_evidence": "interaction",
+      "prompt_constraint": "设置共同设计理想学校的角色互动，要求孩子提出一个想法和理由。"
+    },
+    {
+      "intent_key": "what_lesson_is_lisa_having.primary",
+      "target_id": "what_lesson_is_lisa_having",
+      "scenario_ids": [
+        "school-subjects",
+        "school-day"
+      ],
+      "purpose": "引导孩子完成Lisa 正在上什么课？。",
+      "semantic_focus": "理解根据课堂线索询问正在上的课程，并能完整回答科目。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "identify_lesson_from_instructions.primary",
+      "target_id": "identify_lesson_from_instructions",
+      "scenario_ids": [
+        "school-day"
+      ],
+      "purpose": "引导孩子完成根据课堂指令识别课程科目。",
+      "semantic_focus": "听懂课堂指令中的关键词，并判断学生正在上的课程。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "ask_permission_about_club.primary",
+      "target_id": "ask_permission_about_club",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成我可以询问一些关于……的问题吗？。",
+      "semantic_focus": "理解礼貌开启社团信息询问的句型，并能在角色和信息缺口下主动使用。",
+      "dialogue_evidence": "initiate_question",
+      "prompt_constraint": "设置相关角色、真实目的和信息缺口，允许孩子围绕目标信息维度组织自然问题，不给完整教材问句支架。"
+    },
+    {
+      "intent_key": "ask_how_to_join_club.primary",
+      "target_id": "ask_how_to_join_club",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成我怎样加入……社团？。",
+      "semantic_focus": "理解询问加入社团方法的句型，并能主动提出相关问题。",
+      "dialogue_evidence": "initiate_question",
+      "prompt_constraint": "设置相关角色、真实目的和信息缺口，允许孩子围绕目标信息维度组织自然问题，不给完整教材问句支架。"
+    },
+    {
+      "intent_key": "ask_club_capacity.primary",
+      "target_id": "ask_club_capacity",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成……社团可以有多少名学生参加？。",
+      "semantic_focus": "理解询问社团人数限制的问题，并能在信息缺口下主动提问。",
+      "dialogue_evidence": "initiate_question",
+      "prompt_constraint": "设置相关角色、真实目的和信息缺口，允许孩子围绕目标信息维度组织自然问题，不给完整教材问句支架。"
+    },
+    {
+      "intent_key": "ask_school_preference.primary",
+      "target_id": "ask_school_preference",
+      "scenario_ids": [
+        "school-life-post",
+        "dream-school",
+        "compare-school-lives"
+      ],
+      "purpose": "引导孩子完成你最喜欢学校的什么？。",
+      "semantic_focus": "理解询问自己或他人学校最喜欢内容的问题。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "online_post.primary",
+      "target_id": "online_post",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成网络帖子。",
+      "semantic_focus": "理解 online post 是分享学校生活信息的网络帖子。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "username.primary",
+      "target_id": "username",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成用户名。",
+      "semantic_focus": "理解 username 是网络帖子中显示发帖者身份的名称。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "emoji.primary",
+      "target_id": "emoji",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成表情符号。",
+      "semantic_focus": "理解 emoji 在网络帖子中传达情绪或态度的作用。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "present_simple_routines.primary",
+      "target_id": "present_simple_routines",
+      "scenario_ids": [
+        "school-day",
+        "school-life-survey"
+      ],
+      "purpose": "引导孩子完成用一般现在时描述日常安排和事实。",
+      "semantic_focus": "理解一般现在时表达现在事实、经常性活动和固定事实，并能描述学校生活。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "do_you_school_routine.primary",
+      "target_id": "do_you_school_routine",
+      "scenario_ids": [
+        "school-life-survey"
+      ],
+      "purpose": "引导孩子完成你会……吗？/你……吗？。",
+      "semantic_focus": "理解用 Do you ...? 询问同伴学校生活习惯，并能在调查中主动提问。",
+      "dialogue_evidence": "initiate_question",
+      "prompt_constraint": "设置相关角色、真实目的和信息缺口，允许孩子围绕目标信息维度组织自然问题，不给完整教材问句支架。"
+    },
+    {
+      "intent_key": "report_same_school_routine.primary",
+      "target_id": "report_same_school_routine",
+      "scenario_ids": [
+        "school-life-survey",
+        "compare-school-lives"
+      ],
+      "purpose": "引导孩子完成……也是如此。。",
+      "semantic_focus": "理解用 too 报告自己与他人相同的学校生活情况。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "report_different_school_routine.primary",
+      "target_id": "report_different_school_routine",
+      "scenario_ids": [
+        "school-life-survey",
+        "compare-school-lives"
+      ],
+      "purpose": "引导孩子完成……但是……。",
+      "semantic_focus": "理解用 but 报告自己与他人学校生活情况的差异。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "write_school_life_reply.primary",
+      "target_id": "write_school_life_reply",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成用地点、日程、科目和活动写学校生活回复。",
+      "semantic_focus": "理解学校生活回复需要组织哪些信息，并能按主题写出或口头组织多项信息。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "boat_school.primary",
+      "target_id": "boat_school",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "purpose": "引导孩子完成船上学校。",
+      "semantic_focus": "理解 boat school 是洪水期间兼作教室和校车的学校。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "earthquake_drill.primary",
+      "target_id": "earthquake_drill",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "purpose": "引导孩子完成地震演练。",
+      "semantic_focus": "理解 earthquake drill 是学校进行的安全演练活动。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "table_manners.primary",
+      "target_id": "table_manners",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "purpose": "引导孩子完成餐桌礼仪。",
+      "semantic_focus": "理解 table manners 是在用餐时应遵守的礼仪。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "word_cloud.primary",
+      "target_id": "word_cloud",
+      "scenario_ids": [
+        "dream-school"
+      ],
+      "purpose": "引导孩子完成词云。",
+      "semantic_focus": "理解 word cloud 是把想法按受欢迎程度可视化的工具。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "make_a_word_cloud.primary",
+      "target_id": "make_a_word_cloud",
+      "scenario_ids": [
+        "dream-school"
+      ],
+      "purpose": "引导孩子完成制作词云。",
+      "semantic_focus": "理解制作词云的项目任务，并能说明如何收集想法和生成结果。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "collect_school_ideas.primary",
+      "target_id": "collect_school_ideas",
+      "scenario_ids": [
+        "dream-school"
+      ],
+      "purpose": "引导孩子完成提问并收集学校生活想法。",
+      "semantic_focus": "理解项目中的调查目的，并能通过提问收集自己和他人对学校的想法。",
+      "dialogue_evidence": "interaction",
+      "prompt_constraint": "设置同主题角色互动，要求孩子完成目标动作并回应对方。"
+    },
+    {
+      "intent_key": "where_are_students.primary",
+      "target_id": "where_are_students",
+      "scenario_ids": [
+        "school-introduction"
+      ],
+      "purpose": "引导孩子完成学生们在哪里？。",
+      "semantic_focus": "理解询问学生所在地点的问题，并能根据学校图片完整回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "what_are_students_doing.primary",
+      "target_id": "what_are_students_doing",
+      "scenario_ids": [
+        "school-introduction"
+      ],
+      "purpose": "引导孩子完成他们在那里做什么？。",
+      "semantic_focus": "理解询问学生正在进行的学校活动，并能根据图片完整回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "ask_where_you_live.primary",
+      "target_id": "ask_where_you_live",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成你住在哪里？。",
+      "semantic_focus": "理解在学校生活帖子中询问居住地的问题，并能完整回答。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "im_from_place.primary",
+      "target_id": "im_from_place",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成我来自……。",
+      "semantic_focus": "理解介绍自己所在地点的句型，并能在学校生活介绍中自然使用。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "what_is_an_online_post.primary",
+      "target_id": "what_is_an_online_post",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成什么是网络帖子？。",
+      "semantic_focus": "理解询问网络帖子定义的问题，并能说明其基本用途或组成。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "what_is_special_about_school_life.primary",
+      "target_id": "what_is_special_about_school_life",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成Mikko 的学校生活有什么特别之处？。",
+      "semantic_focus": "理解概括学校生活特点的问题，并能用完整回答说明核心信息。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "explain_emoji_meaning.primary",
+      "target_id": "explain_emoji_meaning",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成解释帖子中表情符号的含义。",
+      "semantic_focus": "理解表情符号在帖子中表达情绪或态度的功能，并能解释其含义。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "science_lesson.primary",
+      "target_id": "science_lesson",
+      "scenario_ids": [
+        "school-day"
+      ],
+      "purpose": "引导孩子完成科学课。",
+      "semantic_focus": "理解 science lesson 表示一节科学课，并能根据课堂线索识别课程。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "calligraphy_club.primary",
+      "target_id": "calligraphy_club",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成书法社团。",
+      "semantic_focus": "理解 Calligraphy Club 是学校公告栏中的一个社团，并能询问或说明相关信息。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "stem_club.primary",
+      "target_id": "stem_club",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成STEM 社团。",
+      "semantic_focus": "理解 STEM Club 是学校公告栏中的一个社团，并能说明其活动。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "football_club.primary",
+      "target_id": "football_club",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成足球社团。",
+      "semantic_focus": "理解 Football Club 是学校公告栏中的一个社团，并能询问其时间或参加信息。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "cooking_club.primary",
+      "target_id": "cooking_club",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成烹饪社团。",
+      "semantic_focus": "理解 Cooking Club 是学校公告栏中的一个社团，并能询问或说明相关信息。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "greet_teacher_politely.primary",
+      "target_id": "greet_teacher_politely",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成礼貌地问候老师。",
+      "semantic_focus": "理解面对面或书信中礼貌问候老师的交际功能，并能在角色互动中完成。",
+      "dialogue_evidence": "interaction",
+      "prompt_constraint": "设置同主题角色互动，要求孩子完成目标动作并回应对方。"
+    },
+    {
+      "intent_key": "good_afternoon_teacher.primary",
+      "target_id": "good_afternoon_teacher",
+      "scenario_ids": [
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成下午好，……。",
+      "semantic_focus": "理解面对面礼貌问候老师的句型，并能在社团询问角色中自然使用。",
+      "dialogue_evidence": "interaction",
+      "prompt_constraint": "设置同主题角色互动，要求孩子完成目标动作并回应对方。"
+    },
+    {
+      "intent_key": "play_a_game.primary",
+      "target_id": "play_a_game",
+      "scenario_ids": [
+        "school-life-post",
+        "dream-school"
+      ],
+      "purpose": "引导孩子完成玩游戏。",
+      "semantic_focus": "理解 play a game 表示进行游戏活动，并能说明学校项目中的活动。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "go_to_school_at.primary",
+      "target_id": "go_to_school_at",
+      "scenario_ids": [
+        "school-life-survey",
+        "school-day"
+      ],
+      "purpose": "引导孩子完成在……时间去上学。",
+      "semantic_focus": "理解用时间说明上学安排的表达，并能描述自己的学校日常。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "go_to_club_after_school.primary",
+      "target_id": "go_to_club_after_school",
+      "scenario_ids": [
+        "school-life-survey",
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成放学后去……社团。",
+      "semantic_focus": "理解用社团和时间说明课后活动的表达，并能描述学校生活。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "play_football.primary",
+      "target_id": "play_football",
+      "scenario_ids": [
+        "school-life-survey",
+        "club-enquiry"
+      ],
+      "purpose": "引导孩子完成踢足球。",
+      "semantic_focus": "理解 play football 表示参加足球活动，并能描述学校生活安排。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "report_false_information_politely.primary",
+      "target_id": "report_false_information_politely",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成礼貌地纠正错误信息。",
+      "semantic_focus": "理解礼貌纠正错误陈述的交际功能，并能说明正确事实。",
+      "dialogue_evidence": "interaction",
+      "prompt_constraint": "设置同主题角色互动，要求孩子完成目标动作并回应对方。"
+    },
+    {
+      "intent_key": "im_afraid_youre_wrong.primary",
+      "target_id": "im_afraid_youre_wrong",
+      "scenario_ids": [
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成恐怕你错了！。",
+      "semantic_focus": "理解礼貌纠正错误信息的开场句型，并能在互动中使用。",
+      "dialogue_evidence": "interaction",
+      "prompt_constraint": "设置同主题角色互动，要求孩子完成目标动作并回应对方。"
+    },
+    {
+      "intent_key": "drill.primary",
+      "target_id": "drill",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "purpose": "引导孩子完成演练。",
+      "semantic_focus": "理解 drill 在学校安全语境中表示演练活动。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "serve_food_in_teams.primary",
+      "target_id": "serve_food_in_teams",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "purpose": "引导孩子完成分组分餐。",
+      "semantic_focus": "理解 serve food in teams 表示学生分组轮流分餐的学校活动。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    },
+    {
+      "intent_key": "which_school_do_you_like_most.primary",
+      "target_id": "which_school_do_you_like_most",
+      "scenario_ids": [
+        "schools-around-world"
+      ],
+      "purpose": "引导孩子完成你最喜欢哪种学校？为什么？。",
+      "semantic_focus": "理解比较不同文化学校并说明偏好的问题。",
+      "dialogue_evidence": "understand_and_respond",
+      "prompt_constraint": "使用页面任务或语义等价问法，引导孩子给出完整回答。"
+    },
+    {
+      "intent_key": "have_classes_like.primary",
+      "target_id": "have_classes_like",
+      "scenario_ids": [
+        "school-day",
+        "school-life-post"
+      ],
+      "purpose": "引导孩子完成我们有……这样的课程。。",
+      "semantic_focus": "理解用一般现在时介绍学校课程的句型，并能描述自己的课程。",
+      "dialogue_evidence": "semantic_expression",
+      "prompt_constraint": "围绕页面任务提问，要求孩子用完整回答表达目标语义。"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "school-subjects",
+      "required": true,
+      "goal": "Talk about school subjects and compare timetables.",
+      "allowed_target_ids": [
+        "subject_maths",
+        "subject_science",
+        "subject_history",
+        "subject_geography",
+        "subject_art",
+        "subject_music",
+        "subject_ict",
+        "subject_pe",
+        "timetable",
+        "have_a_class",
+        "ask_subjects",
+        "compare_timetable",
+        "what_lesson_is_lisa_having"
+      ],
+      "basic_task": "name one subject and one timetable detail",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "club-enquiry",
+      "required": true,
+      "goal": "Ask about a school club and describe one club activity.",
+      "allowed_target_ids": [
+        "subject_science",
+        "club",
+        "experiment",
+        "project",
+        "do_projects",
+        "do_experiments",
+        "ask_for_club_information",
+        "ask_stem_club",
+        "ask_permission_about_club",
+        "ask_how_to_join_club",
+        "ask_club_capacity",
+        "calligraphy_club",
+        "stem_club",
+        "football_club",
+        "cooking_club",
+        "greet_teacher_politely",
+        "good_afternoon_teacher",
+        "go_to_club_after_school",
+        "play_football"
+      ],
+      "basic_task": "ask one club question and describe one activity",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "school-day",
+      "required": true,
+      "goal": "Describe a school day, including lessons, times or breaks.",
+      "allowed_target_ids": [
+        "subject_maths",
+        "subject_science",
+        "subject_history",
+        "subject_geography",
+        "subject_pe",
+        "timetable",
+        "experiment",
+        "do_experiments",
+        "have_a_class",
+        "break",
+        "take_a_lunch_break",
+        "go_outside_and_play",
+        "describe_school_day",
+        "school_day_starts_ends",
+        "identify_lesson_from_instructions",
+        "present_simple_routines",
+        "what_lesson_is_lisa_having",
+        "science_lesson",
+        "have_classes_like",
+        "go_to_school_at"
+      ],
+      "basic_task": "describe one lesson and one part of the school day",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "school-life-post",
+      "required": true,
+      "goal": "Write or discuss a school-life post with timetable, activities and a preference.",
+      "allowed_target_ids": [
+        "subject_ict",
+        "club",
+        "project",
+        "do_projects",
+        "make_a_game",
+        "break",
+        "take_a_lunch_break",
+        "go_outside_and_play",
+        "describe_school_day",
+        "school_day_starts_ends",
+        "compare_school_lives",
+        "express_preference_reason",
+        "ask_school_preference",
+        "online_post",
+        "username",
+        "emoji",
+        "present_simple_routines",
+        "write_school_life_reply",
+        "ask_where_you_live",
+        "im_from_place",
+        "what_is_an_online_post",
+        "what_is_special_about_school_life",
+        "explain_emoji_meaning",
+        "play_a_game",
+        "report_false_information_politely",
+        "im_afraid_youre_wrong",
+        "have_classes_like"
+      ],
+      "basic_task": "give one school-life detail and one preference or activity",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "school-safety-and-respect",
+      "required": true,
+      "goal": "State one safe and respectful rule for sharing school-life information online.",
+      "allowed_target_ids": [
+        "state_online_safety_rule"
+      ],
+      "basic_task": "state one safe posting rule",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "dream-school",
+      "required": true,
+      "goal": "Design a dream school idea and explain one choice.",
+      "allowed_target_ids": [
+        "subject_maths",
+        "subject_science",
+        "subject_art",
+        "subject_music",
+        "subject_ict",
+        "project",
+        "do_projects",
+        "make_a_game",
+        "express_preference_reason",
+        "describe_dream_school",
+        "ask_school_preference",
+        "word_cloud",
+        "make_a_word_cloud",
+        "collect_school_ideas",
+        "play_a_game"
+      ],
+      "basic_task": "describe one dream-school idea and one reason",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "compare-school-lives",
+      "required": false,
+      "goal": "Compare two school lives using one similarity or difference.",
+      "allowed_target_ids": [
+        "subject_history",
+        "subject_geography",
+        "compare_timetable",
+        "compare_school_lives",
+        "express_preference_reason",
+        "ask_school_preference",
+        "report_same_school_routine",
+        "report_different_school_routine"
+      ],
+      "basic_task": "state one similarity or difference",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "school-life-survey",
+      "required": true,
+      "goal": "Ask and answer about school-life routines, then report a similarity or difference.",
+      "allowed_target_ids": [
+        "present_simple_routines",
+        "do_you_school_routine",
+        "report_same_school_routine",
+        "report_different_school_routine",
+        "go_to_school_at",
+        "go_to_club_after_school",
+        "play_football"
+      ],
+      "basic_task": "ask one routine question and report one result",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "schools-around-world",
+      "required": true,
+      "goal": "Talk about school life in different cultures and explain one preference.",
+      "allowed_target_ids": [
+        "boat_school",
+        "earthquake_drill",
+        "table_manners",
+        "express_preference_reason",
+        "drill",
+        "serve_food_in_teams",
+        "which_school_do_you_like_most"
+      ],
+      "basic_task": "describe one school feature and give one reason",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    },
+    {
+      "scenario_id": "school-introduction",
+      "required": true,
+      "goal": "Answer simple questions about students, places and school activities.",
+      "allowed_target_ids": [
+        "where_are_students",
+        "what_are_students_doing"
+      ],
+      "basic_task": "say where students are and what they are doing",
+      "advanced_modes": [
+        "role_play",
+        "reasoned_response"
+      ]
+    }
+  ],
+  "completion": {
+    "all_core_targets_covered": true,
+    "minimum_independent_ratio": 0.85,
+    "required_scenarios": [
+      "school-subjects",
+      "club-enquiry",
+      "school-day",
+      "school-life-post",
+      "school-safety-and-respect",
+      "dream-school",
+      "school-life-survey",
+      "schools-around-world",
+      "school-introduction"
+    ],
+    "minimum_advanced_scenarios": 2
+  }
+}

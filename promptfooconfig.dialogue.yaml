@@ -1,0 +1,8 @@
+description: Dada Unit 1 v5 Dialogue state-machine real-LLM golden evaluation
+providers:
+  - id: file://promptfoo/dada-dialogue-provider.mjs
+    label: dada-dialogue-state-machine-v5-live
+prompts:
+  - '{"case_id":"{{case_id}}"}'
+tests:
+  - file://promptfoo/dialogue-v5-tests.mjs

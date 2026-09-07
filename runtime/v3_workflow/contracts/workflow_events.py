@@ -22,4 +22,18 @@ COMMON_EVENT_TYPES = frozenset(
 )
 ENTRY_EVENT_TYPES = frozenset({"reentry_requested", "reentry_resolved"})
 REVIEW_EVENT_TYPES = frozenset({"question_locked", "question_released", "schedule_applied", "material_archived"})
-EVENT_TYPES = COMMON_EVENT_TYPES | ENTRY_EVENT_TYPES | REVIEW_EVENT_TYPES
+DIALOGUE_EVENT_TYPES = frozenset(
+    {
+        "dialogue_turn_evaluated",
+        "dialogue_capture_committed",
+        "dialogue_wrapping_started",
+        "dialogue_batch_ready",
+        "unit_course_passed",
+        "dialogue_round_planned",
+        "dialogue_question_intent_used",
+        "dialogue_progress_checkpoint",
+        "dialogue_round_completed",
+        "dialogue_target_reopened",
+    }
+)
+EVENT_TYPES = COMMON_EVENT_TYPES | ENTRY_EVENT_TYPES | REVIEW_EVENT_TYPES | DIALOGUE_EVENT_TYPES

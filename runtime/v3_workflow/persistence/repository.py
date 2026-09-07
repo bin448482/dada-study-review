@@ -8,10 +8,11 @@ from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 import sqlite3
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 from uuid import uuid4
 
 from ..contracts.validation import WorkflowContractError, validate_workflow_log_event
+from ..review_context import ReviewContextError, validate_review_context
 from .schema import initialize_schema
 
 
@@ -23,6 +24,15 @@ class RepositoryError(RuntimeError):
 class ReviewAssessmentOutcome:
     last_event_id: str
     has_next_item: bool
+
+
+@dataclass(frozen=True)
+class DialogueTurnOutcome:
+    last_event_id: str
+    learning_item_id: str | None
+    captured_count: int
+    wrapping_up: bool
+    closed: bool = False
 
 
 _FORBIDDEN_KEYS = frozenset({"authorization", "api_key", "apikey", "token", "cookie", "password", "secret"})
@@ -88,7 +98,7 @@ class WorkflowRepository:
 
     def get_active_workflow(self, external_session_id: str, workflow_type: str | None = None) -> dict[str, Any] | None:
         _require_text(external_session_id, "external session id")
-        if workflow_type is not None and workflow_type not in {"entry", "review"}:
+        if workflow_type is not None and workflow_type not in {"entry", "review", "dialogue"}:
             raise RepositoryError("workflow type is unsupported")
         with self._connection() as connection:
             if workflow_type is None:
@@ -207,6 +217,561 @@ class WorkflowRepository:
             self._append_event(connection, workflow_id, "state_transition", {"from_state": None, "to_state": "entry_collecting", "cause": "start"}, timestamp)
             return self._append_event(connection, workflow_id, "child_message", {"text": trigger_message}, timestamp)
 
+    def start_dialogue(
+        self,
+        workflow_id: str,
+        external_session_id: str,
+        system_prompt: str,
+        trigger_message: str,
+        unit_id: str,
+        unit_version: int,
+        unit_content_hash: str,
+        scenario_id: str,
+        target_id: str,
+        difficulty_level: int,
+        created_at: str,
+        round_plan: dict[str, Any] | None = None,
+    ) -> str:
+        """Start one authorized Dialogue with already-loaded Unit control facts."""
+
+        timestamp = canonical_time(created_at)
+        for value, label in (
+            (workflow_id, "workflow id"), (external_session_id, "external session id"),
+            (system_prompt, "system prompt"), (trigger_message, "trigger message"),
+            (unit_id, "unit id"), (unit_content_hash, "unit content hash"),
+            (scenario_id, "scenario id"), (target_id, "target id"),
+        ):
+            _require_text(value, label)
+        if type(unit_version) is not int or unit_version <= 0:
+            raise RepositoryError("unit version is invalid")
+        if type(difficulty_level) is not int or not 2 <= difficulty_level <= 4:
+            raise RepositoryError("dialogue difficulty is invalid")
+        plan = dict(round_plan or {})
+        plan_id = str(plan.get("plan_id", ""))
+        plan_json = canonical_json(plan) if plan else "{}"
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            if connection.execute("SELECT 1 FROM workflows WHERE external_session_id = ? AND phase = 'active'", (external_session_id,)).fetchone() is not None:
+                raise RepositoryError("an active workflow already exists")
+            connection.execute(
+                """INSERT INTO workflows(workflow_id, external_session_id, workflow_type, phase, learning_item_id,
+                   question_sequence, locked_question_mode, locked_question_json, locked_item_revision, locked_at,
+                   started_at, paused_at, closed_at)
+                   VALUES (?, ?, 'dialogue', 'active', NULL, 0, NULL, NULL, NULL, NULL, ?, NULL, NULL)""",
+                (workflow_id, external_session_id, timestamp),
+            )
+            connection.execute(
+                """INSERT INTO dialogue_workflow_state(
+                     workflow_id, unit_id, unit_version, unit_content_hash, current_scenario_id,
+                     current_target_id, current_difficulty_level, pending_repetition_target_id,
+                     captured_count, subphase
+                   ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 0, 'normal')""",
+                (workflow_id, unit_id, unit_version, unit_content_hash, scenario_id, target_id, difficulty_level),
+            )
+            if plan:
+                connection.execute(
+                    """INSERT INTO dialogue_round_plans(workflow_id, plan_id, plan_json, current_step_index, content_turn_count, status)
+                       VALUES (?, ?, ?, 0, 0, 'active')""",
+                    (workflow_id, plan_id, plan_json),
+                )
+                self._append_event(connection, workflow_id, "dialogue_round_planned", plan, timestamp)
+            self._append_event(connection, workflow_id, "system_prompt", {"text": system_prompt}, timestamp)
+            self._append_event(connection, workflow_id, "state_transition", {"from_state": None, "to_state": "dialogue_active", "cause": "start"}, timestamp)
+            return self._append_event(connection, workflow_id, "child_message", {"text": trigger_message}, timestamp)
+
+    def get_dialogue_context(self, workflow_id: str) -> dict[str, Any]:
+        """Read the active Dialogue control state without making language decisions."""
+
+        with self._connection() as connection:
+            row = connection.execute(
+                """SELECT workflow.*, state.unit_id, state.unit_version, state.unit_content_hash,
+                          state.current_scenario_id, state.current_target_id, state.current_difficulty_level,
+                          state.pending_repetition_target_id, state.captured_count, state.subphase,
+                          COALESCE(plan.plan_id, '') AS round_plan_id, COALESCE(plan.plan_json, '{}') AS round_plan_json,
+                          COALESCE(plan.current_step_index, 0) AS current_step_index,
+                          COALESCE(plan.content_turn_count, 0) AS content_turn_count,
+                          COALESCE(plan.status, 'active') AS round_plan_status
+                   FROM workflows AS workflow JOIN dialogue_workflow_state AS state ON state.workflow_id = workflow.workflow_id
+                   LEFT JOIN dialogue_round_plans AS plan ON plan.workflow_id = workflow.workflow_id
+                   WHERE workflow.workflow_id = ? AND workflow.workflow_type = 'dialogue'""",
+                (workflow_id,),
+            ).fetchone()
+        if row is None:
+            raise RepositoryError("dialogue workflow was not found")
+        return dict(row)
+
+    def list_dialogue_history(self, workflow_id: str, limit: int = 20) -> tuple[dict[str, Any], ...]:
+        if type(limit) is not int or limit <= 0:
+            raise RepositoryError("dialogue history limit is invalid")
+        with self._connection() as connection:
+            rows = connection.execute(
+                """SELECT event_id, event_type, payload_json, created_at FROM workflow_log_events
+                   WHERE workflow_id = ? AND event_type IN ('child_message', 'assistant_response')
+                   ORDER BY sequence_no DESC LIMIT ?""",
+                (workflow_id, limit),
+            ).fetchall()
+        return tuple(
+            {"event_id": str(row["event_id"]), "event_type": str(row["event_type"]),
+             "text": json.loads(row["payload_json"])["data"]["text"], "created_at": str(row["created_at"])}
+            for row in reversed(rows)
+        )
+
+    def get_dialogue_mastery_snapshot(self, external_session_id: str, unit_id: str, unit_version: int) -> dict[str, Any]:
+        """Aggregate child mastery by stable target ID across Unit package versions."""
+
+        _require_text(external_session_id, "external session id")
+        _require_text(unit_id, "unit id")
+        if type(unit_version) is not int or unit_version <= 0:
+            raise RepositoryError("unit version is invalid")
+        with self._connection() as connection:
+            rows = connection.execute(
+                """SELECT event.event_type, event.payload_json, event.created_at,
+                          event.sequence_no, workflow.started_at
+                   FROM workflow_log_events AS event
+                   JOIN workflows AS workflow ON workflow.workflow_id = event.workflow_id
+                   WHERE workflow.external_session_id = ? AND workflow.workflow_type = 'dialogue'
+                     AND event.event_type IN ('dialogue_turn_evaluated', 'dialogue_target_reopened')
+                   ORDER BY event.created_at, workflow.started_at, event.sequence_no""",
+                (external_session_id,),
+            ).fetchall()
+            passed = connection.execute(
+                """SELECT 1 FROM workflow_log_events AS event
+                   JOIN workflows AS workflow ON workflow.workflow_id = event.workflow_id
+                   JOIN dialogue_workflow_state AS state ON state.workflow_id = workflow.workflow_id
+                   WHERE workflow.external_session_id = ? AND workflow.workflow_type = 'dialogue'
+                     AND state.unit_id = ? AND state.unit_version = ?
+                     AND event.event_type = 'unit_course_passed'
+                   LIMIT 1""",
+                (external_session_id, unit_id, unit_version),
+            ).fetchone() is not None
+        target_progress: dict[str, dict[str, int]] = {}
+        reopened_target_ids: set[str] = set()
+        scenario_progress: dict[str, str] = {}
+        ranks = {"none": 0, "basic": 1, "role_play": 2, "reasoned_response": 2}
+        for row in rows:
+            data = json.loads(row["payload_json"])["data"]
+            target = str(data["target_id"])
+            if row["event_type"] == "dialogue_target_reopened":
+                target_progress[target] = {"exposed": 0, "supported_success": 0, "independent_success": 0, "unable": 0}
+                reopened_target_ids.add(target)
+                continue
+            progress = target_progress.setdefault(target, {"exposed": 0, "supported_success": 0, "independent_success": 0, "unable": 0})
+            progress[str(data["target_evidence"])] += 1
+            if data["target_evidence"] == "independent_success":
+                reopened_target_ids.discard(target)
+            if data.get("unit_id") != unit_id:
+                continue
+            scenario = str(data.get("scenario_id", ""))
+            achievement = str(data["scenario_achievement"])
+            if scenario and ranks[achievement] >= ranks.get(scenario_progress.get(scenario, "none"), 0):
+                scenario_progress[scenario] = achievement
+        return {"target_progress": target_progress, "reopened_target_ids": sorted(reopened_target_ids), "scenario_progress": scenario_progress, "unit_course_passed": passed}
+
+    def get_dialogue_retryable_targets(self, external_session_id: str, unit_id: str, unit_version: int) -> set[str]:
+        """Return latest retryable target outcomes across package versions."""
+
+        _require_text(external_session_id, "external session id")
+        _require_text(unit_id, "unit id")
+        if type(unit_version) is not int or unit_version <= 0:
+            raise RepositoryError("unit version is invalid")
+        latest: dict[str, str] = {}
+        with self._connection() as connection:
+            rows = connection.execute(
+                """SELECT event.payload_json FROM workflow_log_events AS event
+                   JOIN workflows AS workflow ON workflow.workflow_id = event.workflow_id
+                   WHERE workflow.external_session_id = ? AND workflow.workflow_type = 'dialogue'
+                     AND event.event_type = 'dialogue_question_intent_used'
+                   ORDER BY event.created_at, workflow.started_at, event.sequence_no""",
+                (external_session_id,),
+            ).fetchall()
+        for row in rows:
+            data = json.loads(row["payload_json"])["data"]
+            latest[str(data["target_id"])] = str(data["result"])
+        return {target_id for target_id, result in latest.items() if result == "retryable"}
+
+    def get_dialogue_retryable_question_intents(self, external_session_id: str, unit_id: str, unit_version: int) -> set[str]:
+        """Return current-Unit retryable intents without package-version isolation."""
+
+        _require_text(external_session_id, "external session id")
+        _require_text(unit_id, "unit id")
+        if type(unit_version) is not int or unit_version <= 0:
+            raise RepositoryError("unit version is invalid")
+        latest: dict[str, str] = {}
+        with self._connection() as connection:
+            rows = connection.execute(
+                """SELECT event.payload_json FROM workflow_log_events AS event
+                   JOIN workflows AS workflow ON workflow.workflow_id = event.workflow_id
+                   WHERE workflow.external_session_id = ? AND workflow.workflow_type = 'dialogue'
+                     AND event.event_type = 'dialogue_question_intent_used'
+                   ORDER BY event.created_at, workflow.started_at, event.sequence_no""",
+                (external_session_id,),
+            ).fetchall()
+        for row in rows:
+            data = json.loads(row["payload_json"])["data"]
+            if data.get("unit_id", unit_id) == unit_id:
+                latest[str(data["question_intent_key"])] = str(data["result"])
+        return {key for key, result in latest.items() if result == "retryable"}
+
+    def get_dialogue_used_question_intents(self, external_session_id: str, unit_id: str, unit_version: int) -> set[str]:
+        """Return completed current-Unit intents across package versions."""
+
+        _require_text(external_session_id, "external session id")
+        _require_text(unit_id, "unit id")
+        if type(unit_version) is not int or unit_version <= 0:
+            raise RepositoryError("unit version is invalid")
+        latest: dict[str, str] = {}
+        with self._connection() as connection:
+            rows = connection.execute(
+                """SELECT event.payload_json FROM workflow_log_events AS event
+                   JOIN workflows AS workflow ON workflow.workflow_id = event.workflow_id
+                   WHERE workflow.external_session_id = ? AND workflow.workflow_type = 'dialogue'
+                     AND event.event_type = 'dialogue_question_intent_used'
+                   ORDER BY event.created_at, workflow.started_at, event.sequence_no""",
+                (external_session_id,),
+            ).fetchall()
+        for row in rows:
+            data = json.loads(row["payload_json"])['data']
+            if data.get("unit_id", unit_id) == unit_id:
+                latest[str(data["question_intent_key"])] = str(data["result"])
+        return {key for key, result in latest.items() if result == "completed"}
+
+    def get_unprocessed_dialogue_child_event(self, workflow_id: str) -> dict[str, str] | None:
+        with self._connection() as connection:
+            row = connection.execute(
+                """SELECT child.event_id, child.payload_json FROM workflow_log_events AS child
+                   WHERE child.workflow_id = ? AND child.event_type = 'child_message'
+                     AND NOT EXISTS (
+                       SELECT 1 FROM workflow_log_events AS outcome
+                       WHERE outcome.workflow_id = child.workflow_id AND outcome.sequence_no > child.sequence_no
+                         AND outcome.event_type = 'assistant_response'
+                     ) ORDER BY child.sequence_no LIMIT 1""",
+                (workflow_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        text = json.loads(row["payload_json"]).get("data", {}).get("text")
+        _require_text(text, "unprocessed dialogue child text")
+        return {"event_id": str(row["event_id"]), "text": str(text)}
+
+    def commit_dialogue_turn(
+        self,
+        workflow_id: str,
+        source_child_event_id: str,
+        source_llm_response_event_id: str,
+        evaluation: dict[str, Any],
+        assistant_response: str,
+        created_at: str,
+        *,
+        next_scenario_id: str,
+        next_target_id: str,
+        next_difficulty_level: int,
+        pending_repetition_target_id: str | None,
+        capture_targets: list[dict[str, Any]] | None,
+        initial_review_stage: int,
+        initial_due_at: str,
+        close_after_turn: bool = False,
+        unit_course_passed: bool = False,
+        assistant_response_factory: Callable[[int, int, bool], str] | None = None,
+        next_step_index: int | None = None,
+        content_turn_count: int | None = None,
+        round_plan_status: str | None = None,
+        question_intent: dict[str, Any] | None = None,
+        progress_checkpoint: dict[str, Any] | None = None,
+        round_completion_reason: str | None = None,
+    ) -> DialogueTurnOutcome:
+        """Commit one validated Dialogue result and zero or more target-backed items.
+
+        `capture_targets` are selected from the already loaded Unit package by
+        model-returned target IDs. The repository never compares English text:
+        prior captures are identified by stable target IDs across Unit package
+        versions.
+        """
+
+        timestamp = canonical_time(created_at)
+        due_at = canonical_time(initial_due_at)
+        for value, label in (
+            (source_child_event_id, "dialogue source child event id"),
+            (source_llm_response_event_id, "dialogue source response event id"),
+            (assistant_response, "dialogue assistant response"),
+            (next_scenario_id, "next scenario id"), (next_target_id, "next target id"),
+        ):
+            _require_text(value, label)
+        if type(next_difficulty_level) is not int or not 2 <= next_difficulty_level <= 4:
+            raise RepositoryError("next dialogue difficulty is invalid")
+        if pending_repetition_target_id is not None:
+            _require_text(pending_repetition_target_id, "pending repetition target id")
+        if type(initial_review_stage) is not int or initial_review_stage < 0:
+            raise RepositoryError("initial review stage is invalid")
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            workflow = self._require_active(connection, workflow_id, "dialogue")
+            state = connection.execute("SELECT * FROM dialogue_workflow_state WHERE workflow_id = ?", (workflow_id,)).fetchone()
+            if state is None:
+                raise RepositoryError("dialogue state is missing")
+            self._require_dialogue_source_events(connection, workflow_id, source_child_event_id, source_llm_response_event_id)
+            self._append_event(connection, workflow_id, "dialogue_turn_evaluated", evaluation, timestamp)
+            if question_intent is not None:
+                self._append_event(connection, workflow_id, "dialogue_question_intent_used", question_intent, timestamp)
+            learning_item_id: str | None = None
+            captured_before = int(state["captured_count"])
+            captured_count = captured_before
+            normalized_capture_targets = list(capture_targets or [])
+            if len({str(item.get("target_id")) for item in normalized_capture_targets}) != len(normalized_capture_targets):
+                raise RepositoryError("dialogue capture targets must be unique")
+            for capture_target in normalized_capture_targets:
+                item_id, created = self._commit_dialogue_capture(
+                    connection, workflow, state, source_child_event_id, capture_target,
+                    initial_review_stage, due_at, timestamp,
+                )
+                if learning_item_id is None:
+                    learning_item_id = item_id
+                if created:
+                    captured_count += 1
+                self._append_event(
+                    connection, workflow_id, "dialogue_capture_committed",
+                    {"source_child_event_id": source_child_event_id, "target_id": capture_target["target_id"],
+                     "learning_item_id": item_id, "captured_count_incremented": created},
+                    timestamp,
+                )
+            wrapping = False
+            plan_row = connection.execute("SELECT * FROM dialogue_round_plans WHERE workflow_id = ?", (workflow_id,)).fetchone()
+            planned = "" if plan_row is None else str(plan_row["plan_id"])
+            completed_round = bool(round_completion_reason == "completed" or round_plan_status == "completed")
+            next_count = 0 if plan_row is None else int(plan_row["content_turn_count"])
+            if content_turn_count is not None:
+                next_count = int(content_turn_count)
+            next_index = 0 if plan_row is None else int(plan_row["current_step_index"])
+            if next_step_index is not None:
+                next_index = int(next_step_index)
+            next_status = "active" if plan_row is None else str(plan_row["status"])
+            if round_plan_status is not None:
+                next_status = round_plan_status
+            if next_count < 0 or next_count > 12 or next_index < 0 or next_status not in {"active", "completed", "closed_without_completion"}:
+                raise RepositoryError("dialogue round plan state is invalid")
+            connection.execute(
+                """UPDATE dialogue_workflow_state SET current_scenario_id = ?, current_target_id = ?,
+                   current_difficulty_level = ?, pending_repetition_target_id = ?, captured_count = ?, subphase = ?
+                   WHERE workflow_id = ?""",
+                (next_scenario_id, next_target_id, next_difficulty_level, pending_repetition_target_id,
+                 captured_count, "normal", workflow_id),
+            )
+            if plan_row is not None:
+                connection.execute(
+                    "UPDATE dialogue_round_plans SET current_step_index = ?, content_turn_count = ?, status = ? WHERE workflow_id = ?",
+                    (next_index, next_count, next_status, workflow_id),
+                )
+            event_completion_reason = round_completion_reason
+            if event_completion_reason is None and close_after_turn and planned:
+                event_completion_reason = "closed_without_completion"
+                next_status = "closed_without_completion"
+                connection.execute("UPDATE dialogue_round_plans SET status = ? WHERE workflow_id = ?", (next_status, workflow_id))
+            if progress_checkpoint is not None:
+                self._append_event(connection, workflow_id, "dialogue_progress_checkpoint", progress_checkpoint, timestamp)
+            if event_completion_reason is not None and planned:
+                self._append_event(connection, workflow_id, "dialogue_round_completed", {
+                    "plan_id": planned, "completed_steps": next_index if event_completion_reason == "completed" else max(0, next_index),
+                    "content_turn_count": next_count, "reason": event_completion_reason,
+                }, timestamp)
+            if close_after_turn or (round_completion_reason is not None and planned):
+                self._close_dialogue_in_transaction(connection, workflow_id, captured_count, timestamp)
+            if unit_course_passed:
+                prior = connection.execute(
+                    """SELECT 1 FROM workflow_log_events AS event
+                       JOIN workflows AS source ON source.workflow_id = event.workflow_id
+                       JOIN dialogue_workflow_state AS source_state ON source_state.workflow_id = source.workflow_id
+                       WHERE source.external_session_id = ? AND source_state.unit_id = ? AND source_state.unit_version = ?
+                         AND event.event_type = 'unit_course_passed' LIMIT 1""",
+                    (workflow["external_session_id"], state["unit_id"], state["unit_version"]),
+                ).fetchone()
+                if prior is None:
+                    self._append_event(connection, workflow_id, "unit_course_passed", {"unit_id": state["unit_id"], "unit_version": state["unit_version"]}, timestamp)
+            response_text = assistant_response if assistant_response_factory is None else assistant_response_factory(
+                captured_before, captured_count, wrapping
+            )
+            _require_text(response_text, "dialogue visible response")
+            event_id = self._append_event(
+                connection, workflow_id, "assistant_response",
+                {"text": response_text, "source_llm_response_event_id": source_llm_response_event_id}, timestamp,
+            )
+            return DialogueTurnOutcome(event_id, learning_item_id, captured_count, wrapping, close_after_turn or (round_completion_reason is not None and planned))
+
+    def close_dialogue_and_prepare_batch(self, workflow_id: str, response_text: str, created_at: str) -> str:
+        """Close Dialogue and retain a ready batch for every non-empty capture set."""
+
+        timestamp = canonical_time(created_at)
+        _require_text(response_text, "dialogue closing response")
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            self._require_active(connection, workflow_id, "dialogue")
+            state = connection.execute("SELECT captured_count FROM dialogue_workflow_state WHERE workflow_id = ?", (workflow_id,)).fetchone()
+            if state is None:
+                raise RepositoryError("dialogue state is missing")
+            self._close_dialogue_in_transaction(connection, workflow_id, int(state["captured_count"]), timestamp)
+            return self._append_event(connection, workflow_id, "assistant_response", {"text": response_text}, timestamp)
+
+    def backfill_closed_dialogue_batch(self, workflow_id: str, created_at: str) -> str | None:
+        """Idempotently create the batch that a pre-change closed Dialogue deserved."""
+
+        timestamp = canonical_time(created_at)
+        _require_text(workflow_id, "dialogue workflow id")
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            workflow = connection.execute(
+                "SELECT * FROM workflows WHERE workflow_id = ? AND workflow_type = 'dialogue' AND phase = 'closed'",
+                (workflow_id,),
+            ).fetchone()
+            if workflow is None:
+                raise RepositoryError("closed Dialogue workflow is required")
+            existing = connection.execute(
+                "SELECT batch_id FROM dialogue_review_batches WHERE source_dialogue_workflow_id = ?",
+                (workflow_id,),
+            ).fetchone()
+            if existing is not None:
+                return str(existing["batch_id"])
+            state = connection.execute(
+                "SELECT captured_count FROM dialogue_workflow_state WHERE workflow_id = ?",
+                (workflow_id,),
+            ).fetchone()
+            captured_count = 0 if state is None else int(state["captured_count"])
+            if captured_count <= 0:
+                return None
+            rows = connection.execute(
+                """SELECT DISTINCT json_extract(event.payload_json, '$.data.learning_item_id') AS learning_item_id
+                   FROM workflow_log_events AS event
+                   WHERE event.workflow_id = ? AND event.event_type = 'dialogue_capture_committed'
+                     AND json_extract(event.payload_json, '$.data.captured_count_incremented') = 1
+                   ORDER BY event.sequence_no""",
+                (workflow_id,),
+            ).fetchall()
+            item_ids = [str(row["learning_item_id"]) for row in rows if row["learning_item_id"]]
+            if not item_ids or len(item_ids) != captured_count or len(item_ids) != len(set(item_ids)):
+                raise RepositoryError("closed Dialogue captures cannot form a complete batch")
+            eligible = connection.execute(
+                f"""SELECT COUNT(*) AS count FROM learning_items AS item
+                    JOIN learning_materials AS material ON material.material_id = item.material_id
+                    JOIN workflows AS source ON source.workflow_id = material.source_workflow_id
+                    WHERE source.external_session_id = ? AND item.learning_item_id IN ({','.join('?' for _ in item_ids)})
+                      AND material.status = 'active' AND material.needs_parent_review = 0
+                      AND item.completed_at IS NULL""",
+                (workflow["external_session_id"], *item_ids),
+            ).fetchone()["count"]
+            if int(eligible) != len(item_ids):
+                raise RepositoryError("closed Dialogue batch contains an ineligible learning item")
+            batch_id = str(uuid4())
+            connection.execute(
+                """INSERT INTO dialogue_review_batches(batch_id, source_dialogue_workflow_id, created_at,
+                   consumed_by_review_workflow_id, consumed_at) VALUES (?, ?, ?, NULL, NULL)""",
+                (batch_id, workflow_id, timestamp),
+            )
+            connection.executemany(
+                "INSERT INTO dialogue_review_batch_items(batch_id, queue_position, learning_item_id) VALUES (?, ?, ?)",
+                [(batch_id, position, item_id) for position, item_id in enumerate(item_ids, start=1)],
+            )
+            self._append_event(connection, workflow_id, "dialogue_batch_ready", {"batch_id": batch_id, "item_count": len(item_ids)}, timestamp)
+            return batch_id
+
+    def _close_dialogue_in_transaction(
+        self, connection: sqlite3.Connection, workflow_id: str, captured_count: int, timestamp: str
+    ) -> None:
+        # The threshold controls the in-round wrapping transition. A closed
+        # Dialogue creates its dedicated Review batch whenever it has at least
+        # one distinct captured learning item.
+        if captured_count > 0:
+            rows = connection.execute(
+                """SELECT DISTINCT json_extract(event.payload_json, '$.data.learning_item_id') AS learning_item_id
+                   FROM workflow_log_events AS event
+                   WHERE event.workflow_id = ? AND event.event_type = 'dialogue_capture_committed'
+                     AND json_extract(event.payload_json, '$.data.captured_count_incremented') = 1
+                   ORDER BY event.sequence_no""",
+                (workflow_id,),
+            ).fetchall()
+            item_ids = [str(row["learning_item_id"]) for row in rows if row["learning_item_id"]]
+            if not item_ids or len(item_ids) != captured_count or len(item_ids) != len(set(item_ids)):
+                raise RepositoryError("dialogue captures cannot form a complete batch")
+            batch_id = str(uuid4())
+            connection.execute(
+                """INSERT INTO dialogue_review_batches(batch_id, source_dialogue_workflow_id, created_at,
+                   consumed_by_review_workflow_id, consumed_at) VALUES (?, ?, ?, NULL, NULL)""",
+                (batch_id, workflow_id, timestamp),
+            )
+            connection.executemany(
+                "INSERT INTO dialogue_review_batch_items(batch_id, queue_position, learning_item_id) VALUES (?, ?, ?)",
+                [(batch_id, position, item_id) for position, item_id in enumerate(item_ids, start=1)],
+            )
+            self._append_event(connection, workflow_id, "dialogue_batch_ready", {"batch_id": batch_id, "item_count": len(item_ids)}, timestamp)
+        self._append_event(connection, workflow_id, "state_transition", {"from_state": "dialogue_active", "to_state": None, "cause": "close"}, timestamp)
+        connection.execute("UPDATE workflows SET phase = 'closed', closed_at = ? WHERE workflow_id = ?", (timestamp, workflow_id))
+
+    def _commit_dialogue_capture(
+        self, connection: sqlite3.Connection, workflow: sqlite3.Row, state: sqlite3.Row, source_child_event_id: str,
+        target: dict[str, Any], initial_review_stage: int, initial_due_at: str, timestamp: str,
+    ) -> tuple[str, bool]:
+        required = {"target_id", "target_type", "english", "meaning_zh", "reviewable"}
+        if not isinstance(target, dict) or not required <= set(target):
+            raise RepositoryError("dialogue capture target is invalid")
+        if set(target) != required and set(target) != required | {"review_design"}:
+            raise RepositoryError("dialogue capture target has unknown fields")
+        for key in ("target_id", "english", "meaning_zh"):
+            _require_text(target[key], f"dialogue capture {key}")
+        if target["target_type"] not in {"word", "phrase", "sentence"} or target["reviewable"] is not True:
+            raise RepositoryError("dialogue capture target is not reviewable")
+        review_context = None
+        if target["target_type"] == "phrase":
+            if "review_design" in target:
+                try:
+                    review_context = validate_review_context(target["review_design"])
+                except ReviewContextError as exc:
+                    raise RepositoryError(str(exc)) from exc
+            # Legacy Unit v1/v5 captures predate review context. New page-
+            # semantic packages require the field in their validated target;
+            # old captures remain nullable until an exact backfill is possible.
+        elif "review_design" in target:
+            raise RepositoryError("review design is only valid for phrase dialogue captures")
+        existing = connection.execute(
+            """SELECT item.learning_item_id
+               FROM workflow_log_events AS event
+               JOIN workflows AS source ON source.workflow_id = event.workflow_id
+               JOIN learning_items AS item
+                 ON item.learning_item_id = json_extract(event.payload_json, '$.data.learning_item_id')
+               JOIN learning_materials AS material ON material.material_id = item.material_id
+               WHERE source.external_session_id = ? AND source.workflow_type = 'dialogue'
+                 AND event.event_type = 'dialogue_capture_committed'
+                 AND json_extract(event.payload_json, '$.data.target_id') = ?
+                 AND material.status = 'active' AND item.completed_at IS NULL
+               ORDER BY event.created_at DESC, source.started_at DESC, event.sequence_no DESC LIMIT 1""",
+            (workflow["external_session_id"], target["target_id"]),
+        ).fetchone()
+        if existing is not None:
+            item_id = str(existing["learning_item_id"])
+            return item_id, False
+        material_id, learning_item_id = str(uuid4()), str(uuid4())
+        audit = {"contract_name": "dada.dialogue_capture", "contract_version": 1,
+                 "data": {"target_id": target["target_id"], "source": "dialogue_state_machine"}}
+        connection.execute(
+            """INSERT INTO learning_materials(material_id, source_workflow_id, status, title, language, unit_type,
+               reference_text, needs_parent_review, audit_result_json, created_at, updated_at)
+               VALUES (?, ?, 'active', ?, 'en', ?, ?, 0, ?, ?, ?)""",
+            (material_id, workflow["workflow_id"], target["english"], target["target_type"], target["english"], canonical_json(audit), timestamp, timestamp),
+        )
+        connection.execute(
+            """INSERT INTO learning_items(learning_item_id, material_id, item_order, reference_text, meaning_zh,
+               review_context_json, review_stage, next_review_at, completed_at, revision, created_at, updated_at)
+               VALUES (?, ?, 1, ?, ?, ?, ?, ?, NULL, 1, ?, ?)""",
+            (learning_item_id, material_id, target["english"], target["meaning_zh"],
+             None if review_context is None else canonical_json(review_context),
+             initial_review_stage, initial_due_at, timestamp, timestamp),
+        )
+        return learning_item_id, True
+
+    @staticmethod
+    def _require_dialogue_source_events(connection: sqlite3.Connection, workflow_id: str, child_event_id: str, llm_response_event_id: str) -> None:
+        child = connection.execute("SELECT event_type, workflow_id FROM workflow_log_events WHERE event_id = ?", (child_event_id,)).fetchone()
+        response = connection.execute("SELECT event_type, workflow_id FROM workflow_log_events WHERE event_id = ?", (llm_response_event_id,)).fetchone()
+        if child is None or child["workflow_id"] != workflow_id or child["event_type"] != "child_message":
+            raise RepositoryError("dialogue child source event is invalid")
+        if response is None or response["workflow_id"] != workflow_id or response["event_type"] != "llm_response":
+            raise RepositoryError("dialogue model source event is invalid")
+
     def request_review_start(self, workflow_id: str, external_session_id: str, created_at: str) -> dict[str, Any] | None:
         """Resume a paused review or freeze all currently due active items.
 
@@ -229,6 +794,9 @@ class WorkflowRepository:
                 connection.execute("UPDATE workflows SET phase = 'active', paused_at = NULL WHERE workflow_id = ?", (paused["workflow_id"],))
                 self._append_event(connection, paused["workflow_id"], "state_transition", {"from_state": None, "to_state": "review_active", "cause": "resume"}, timestamp)
                 return self._row(connection.execute("SELECT * FROM workflows WHERE workflow_id = ?", (paused["workflow_id"],)).fetchone())
+            dialogue_review = self._try_start_review_from_dialogue_batch(connection, workflow_id, external_session_id, timestamp)
+            if dialogue_review is not None:
+                return dialogue_review
             items = connection.execute(
                 """SELECT item.learning_item_id, item.revision FROM learning_items AS item
                    JOIN learning_materials AS material ON material.material_id = item.material_id
@@ -257,6 +825,78 @@ class WorkflowRepository:
             self._append_event(connection, workflow_id, "state_transition", {"from_state": None, "to_state": "review_active", "cause": "start"}, timestamp)
             return self._row(connection.execute("SELECT * FROM workflows WHERE workflow_id = ?", (workflow_id,)).fetchone())
 
+    def start_review_from_dialogue_batch(self, workflow_id: str, external_session_id: str, created_at: str) -> dict[str, Any]:
+        """Consume exactly one ready Dialogue batch into a frozen Review queue.
+
+        Unlike `request_review_start`, this action never falls back to ordinary
+        due items. It is the explicit fixed action used by tests and future
+        controlled handoffs that already know a Dialogue batch must be used.
+        """
+
+        timestamp = canonical_time(created_at)
+        _require_text(workflow_id, "workflow id")
+        _require_text(external_session_id, "external session id")
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            if connection.execute("SELECT 1 FROM workflows WHERE external_session_id = ? AND phase = 'active'", (external_session_id,)).fetchone() is not None:
+                raise RepositoryError("an active workflow already exists")
+            if connection.execute("SELECT 1 FROM workflows WHERE external_session_id = ? AND workflow_type = 'review' AND phase = 'paused_for_entry'", (external_session_id,)).fetchone() is not None:
+                raise RepositoryError("paused review must be resumed instead of consuming a dialogue batch")
+            review = self._try_start_review_from_dialogue_batch(connection, workflow_id, external_session_id, timestamp)
+            if review is None:
+                raise RepositoryError("no ready dialogue review batch is available")
+            return review
+
+    def _try_start_review_from_dialogue_batch(
+        self, connection: sqlite3.Connection, workflow_id: str, external_session_id: str, timestamp: str
+    ) -> dict[str, Any] | None:
+        batch = connection.execute(
+            """SELECT batch.batch_id, batch.source_dialogue_workflow_id
+               FROM dialogue_review_batches AS batch
+               JOIN workflows AS source ON source.workflow_id = batch.source_dialogue_workflow_id
+               WHERE source.external_session_id = ? AND source.workflow_type = 'dialogue'
+                 AND source.phase = 'closed' AND batch.consumed_by_review_workflow_id IS NULL
+               ORDER BY batch.created_at, batch.batch_id LIMIT 1""",
+            (external_session_id,),
+        ).fetchone()
+        if batch is None:
+            return None
+        items = connection.execute(
+            """SELECT batch_item.learning_item_id, item.revision
+               FROM dialogue_review_batch_items AS batch_item
+               JOIN learning_items AS item ON item.learning_item_id = batch_item.learning_item_id
+               JOIN learning_materials AS material ON material.material_id = item.material_id
+               WHERE batch_item.batch_id = ? AND material.status = 'active'
+                 AND material.needs_parent_review = 0 AND item.completed_at IS NULL
+               ORDER BY batch_item.queue_position""",
+            (batch["batch_id"],),
+        ).fetchall()
+        if not items:
+            raise RepositoryError("dialogue review batch is empty or no longer eligible")
+        first = items[0]
+        connection.execute(
+            """INSERT INTO workflows(workflow_id, external_session_id, workflow_type, phase, learning_item_id,
+               question_sequence, locked_question_mode, locked_question_json, locked_item_revision, locked_at,
+               started_at, paused_at, closed_at)
+               VALUES (?, ?, 'review', 'active', ?, 0, NULL, NULL, NULL, NULL, ?, NULL, NULL)""",
+            (workflow_id, external_session_id, first["learning_item_id"], timestamp),
+        )
+        connection.executemany(
+            """INSERT INTO review_queue_items(workflow_id, queue_position, learning_item_id, item_revision_at_start, status, completed_at)
+               VALUES (?, ?, ?, ?, 'pending', NULL)""",
+            [(workflow_id, position, item["learning_item_id"], item["revision"])
+             for position, item in enumerate(items, start=1)],
+        )
+        updated = connection.execute(
+            """UPDATE dialogue_review_batches SET consumed_by_review_workflow_id = ?, consumed_at = ?
+               WHERE batch_id = ? AND consumed_by_review_workflow_id IS NULL""",
+            (workflow_id, timestamp, batch["batch_id"]),
+        )
+        if updated.rowcount != 1:
+            raise RepositoryError("dialogue review batch was already consumed")
+        self._append_event(connection, workflow_id, "state_transition", {"from_state": None, "to_state": "review_active", "cause": "start"}, timestamp)
+        return self._row(connection.execute("SELECT * FROM workflows WHERE workflow_id = ?", (workflow_id,)).fetchone())
+
     def preview_entry_review_start(self, entry_workflow_id: str, at: str) -> dict[str, Any] | None:
         """Read the one eligible item for an entry→review handoff without mutation."""
 
@@ -271,10 +911,10 @@ class WorkflowRepository:
             ).fetchone()
             if paused is not None:
                 return {"kind": "resume", "workflow": dict(paused)}
-            item = self._select_due_item(connection, entry["external_session_id"], timestamp)
-            if item is None:
+            items = self._select_due_items(connection, entry["external_session_id"], timestamp)
+            if not items:
                 return None
-            return {"kind": "new", "entry": dict(entry), "item": dict(item)}
+            return {"kind": "new", "entry": dict(entry), "item": dict(items[0]), "items": tuple(dict(item) for item in items)}
 
     def commit_entry_to_new_review_question(
         self,
@@ -291,6 +931,8 @@ class WorkflowRepository:
         question_json: dict[str, Any],
         assistant_response: str,
         created_at: str,
+        expected_learning_item_id: str | None = None,
+        expected_item_revision: int | None = None,
     ) -> tuple[str, str]:
         """Atomically close ready entry and create the first locked review question.
 
@@ -310,9 +952,14 @@ class WorkflowRepository:
                 raise RepositoryError("entry workflow still has pending re-entry requests")
             if connection.execute("SELECT 1 FROM workflows WHERE external_session_id = ? AND workflow_type = 'review' AND phase = 'paused_for_entry'", (entry["external_session_id"],)).fetchone() is not None:
                 raise RepositoryError("paused review must be resumed instead of creating a new review")
-            item = self._select_due_item(connection, entry["external_session_id"], timestamp)
-            if item is None:
+            items = self._select_due_items(connection, entry["external_session_id"], timestamp)
+            if not items:
                 raise RepositoryError("no due review item is available")
+            item = items[0]
+            if expected_learning_item_id is not None and item["learning_item_id"] != expected_learning_item_id:
+                raise RepositoryError("the first due review item changed before handoff")
+            if expected_item_revision is not None and item["revision"] != expected_item_revision:
+                raise RepositoryError("the first due review item revision changed before handoff")
             self._append_event(connection, entry_workflow_id, "state_transition", {"from_state": "entry_collecting", "to_state": None, "cause": "switch"}, timestamp)
             connection.execute("UPDATE workflows SET phase = 'closed', closed_at = ? WHERE workflow_id = ?", (timestamp, entry_workflow_id))
             connection.execute(
@@ -321,6 +968,13 @@ class WorkflowRepository:
                    started_at, paused_at, closed_at)
                    VALUES (?, ?, 'review', 'active', ?, 0, NULL, NULL, NULL, NULL, ?, NULL, NULL)""",
                 (review_workflow_id, entry["external_session_id"], item["learning_item_id"], timestamp),
+            )
+            connection.executemany(
+                """INSERT INTO review_queue_items(
+                     workflow_id, queue_position, learning_item_id, item_revision_at_start, status, completed_at
+                   ) VALUES (?, ?, ?, ?, 'pending', NULL)""",
+                [(review_workflow_id, position, due_item["learning_item_id"], due_item["revision"])
+                 for position, due_item in enumerate(items, start=1)],
             )
             self._append_event(connection, review_workflow_id, "system_prompt", {"text": review_system_prompt}, timestamp)
             self._append_event(connection, review_workflow_id, "state_transition", {"from_state": None, "to_state": "review_active", "cause": "switch"}, timestamp)
@@ -333,7 +987,7 @@ class WorkflowRepository:
                 self._append_event(connection, review_workflow_id, "internal_reasoning", {"text": reasoning}, timestamp)
             llm_response_id = self._append_event(
                 connection, review_workflow_id, "llm_response",
-                {"task_contract_name": "dada.review_state_machine_turn", "task_contract_version": 3, "output": execution["output"], "source_child_event_id": review_child_event_id}, timestamp,
+                {"task_contract_name": "dada.review_state_machine_turn", "task_contract_version": 5, "output": execution["output"], "source_child_event_id": review_child_event_id}, timestamp,
             )
             question_sequence = 1
             self._append_event(connection, review_workflow_id, "question_locked", {"question_sequence": question_sequence, "question_mode": question_mode, "question_json": question_json, "item_revision": item["revision"]}, timestamp)
@@ -341,6 +995,11 @@ class WorkflowRepository:
                 """UPDATE workflows SET question_sequence = 1, locked_question_mode = ?, locked_question_json = ?,
                    locked_item_revision = ?, locked_at = ? WHERE workflow_id = ?""",
                 (question_mode, canonical_json(question_json), item["revision"], timestamp, review_workflow_id),
+            )
+            connection.execute(
+                """UPDATE review_queue_items SET status = 'locked'
+                   WHERE workflow_id = ? AND learning_item_id = ? AND status = 'pending'""",
+                (review_workflow_id, item["learning_item_id"]),
             )
             assistant_event_id = self._append_event(connection, review_workflow_id, "assistant_response", {"text": assistant_response, "source_llm_response_event_id": llm_response_id}, timestamp)
             return review_workflow_id, assistant_event_id
@@ -385,8 +1044,7 @@ class WorkflowRepository:
 
         with self._connection() as connection:
             row = connection.execute(
-                """SELECT workflow.*, item.learning_item_id, item.reference_text AS item_reference_text,
-                          item.meaning_zh, item.review_stage, item.next_review_at, item.completed_at, item.revision,
+                """SELECT workflow.*, item.*, item.reference_text AS item_reference_text,
                           material.material_id, material.status AS material_status, material.unit_type, material.needs_parent_review
                    FROM workflows AS workflow
                    JOIN learning_items AS item ON item.learning_item_id = workflow.learning_item_id
@@ -396,7 +1054,16 @@ class WorkflowRepository:
             ).fetchone()
         if row is None:
             raise RepositoryError("review workflow was not found")
-        return dict(row)
+        result = dict(row)
+        raw_context = result.get("review_context_json")
+        if raw_context is None:
+            result["review_context"] = None
+        else:
+            try:
+                result["review_context"] = validate_review_context(json.loads(raw_context))
+            except (json.JSONDecodeError, ReviewContextError) as exc:
+                raise RepositoryError("review item context is invalid") from exc
+        return result
 
     def list_review_history(self, workflow_id: str, limit: int = 20) -> tuple[dict[str, Any], ...]:
         """Rebuild bounded same-workflow history from immutable event facts."""
@@ -784,6 +1451,136 @@ class WorkflowRepository:
         )
         return event_id
 
+    def admin_reopen_dialogue_target(
+        self, external_session_id: str, target_id: str, reason: str, created_at: str
+    ) -> dict[str, Any]:
+        """Open a new mastery cycle for one stable target without deleting history."""
+
+        _require_text(external_session_id, "external session id")
+        _require_text(target_id, "target id")
+        _require_text(reason, "reopen reason")
+        if len(reason) > 200 or "\n" in reason or "\r" in reason:
+            raise RepositoryError("reopen reason is invalid")
+        timestamp = canonical_time(created_at)
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            if connection.execute(
+                "SELECT 1 FROM workflows WHERE external_session_id = ? AND phase = 'active' LIMIT 1",
+                (external_session_id,),
+            ).fetchone() is not None:
+                raise RepositoryError("cannot reopen a target while a workflow is active")
+            rows = connection.execute(
+                """SELECT event.workflow_id, event.event_type, event.payload_json,
+                          event.event_id, event.created_at, event.sequence_no,
+                          workflow.started_at
+                   FROM workflow_log_events AS event
+                   JOIN workflows AS workflow ON workflow.workflow_id = event.workflow_id
+                   WHERE workflow.external_session_id = ? AND workflow.workflow_type = 'dialogue'
+                     AND event.event_type IN ('dialogue_turn_evaluated', 'dialogue_target_reopened')
+                   ORDER BY event.created_at, workflow.started_at, event.sequence_no""",
+                (external_session_id,),
+            ).fetchall()
+            lifecycle = None
+            completion_event_id = None
+            completion_workflow_id = None
+            for row in rows:
+                data = json.loads(row["payload_json"])["data"]
+                if str(data["target_id"]) != target_id:
+                    continue
+                if row["event_type"] == "dialogue_target_reopened":
+                    lifecycle = "reopened"
+                elif data["target_evidence"] == "independent_success":
+                    lifecycle = "completed"
+                    completion_event_id = str(row["event_id"])
+                    completion_workflow_id = str(row["workflow_id"])
+            if lifecycle is None:
+                raise RepositoryError("target has no independent completion history")
+            if lifecycle != "completed" or completion_workflow_id is None:
+                raise RepositoryError("target is already open")
+            event_id = self._append_event(
+                connection,
+                completion_workflow_id,
+                "dialogue_target_reopened",
+                {"target_id": target_id, "reason": reason, "actor": "admin_cli"},
+                timestamp,
+            )
+            return {
+                "event_id": event_id,
+                "target_id": target_id,
+                "previous_completion_event_id": completion_event_id,
+                "reopened_at": timestamp,
+            }
+
+    def admin_archive_learning_item(
+        self, external_session_id: str, learning_item_id: str, reason: str, created_at: str
+    ) -> dict[str, Any]:
+        """Archive one single-item material through an explicit local admin action."""
+
+        _require_text(external_session_id, "external session id")
+        _require_text(learning_item_id, "learning item id")
+        _require_text(reason, "archive reason")
+        timestamp = canonical_time(created_at)
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            item = connection.execute(
+                """SELECT item.*, material.material_id, material.status AS material_status,
+                          material.source_workflow_id, material.title
+                   FROM learning_items AS item
+                   JOIN learning_materials AS material ON material.material_id = item.material_id
+                   JOIN workflows AS source ON source.workflow_id = material.source_workflow_id
+                   WHERE item.learning_item_id = ? AND source.external_session_id = ?""",
+                (learning_item_id, external_session_id),
+            ).fetchone()
+            if item is None:
+                raise RepositoryError("learning item was not found in the requested child scope")
+            if item["material_status"] != "active" or item["completed_at"] is not None:
+                raise RepositoryError("learning item is not active")
+            in_progress = connection.execute(
+                """SELECT 1 FROM workflows AS review
+                   WHERE review.workflow_type = 'review' AND review.phase <> 'closed'
+                     AND (review.learning_item_id = ? OR EXISTS (
+                       SELECT 1 FROM review_queue_items AS queue
+                       WHERE queue.workflow_id = review.workflow_id AND queue.learning_item_id = ?))
+                   LIMIT 1""",
+                (learning_item_id, learning_item_id),
+            ).fetchone()
+            if in_progress is not None:
+                raise RepositoryError("learning item is part of an in-progress review")
+
+            revision_after = int(item["revision"]) + 1
+            connection.execute(
+                """UPDATE learning_items
+                   SET next_review_at = NULL, completed_at = ?, revision = ?, updated_at = ?
+                   WHERE learning_item_id = ?""",
+                (timestamp, revision_after, timestamp, learning_item_id),
+            )
+            remaining_items = connection.execute(
+                """SELECT COUNT(*) AS count FROM learning_items
+                   WHERE material_id = ? AND completed_at IS NULL AND learning_item_id <> ?""",
+                (item["material_id"], learning_item_id),
+            ).fetchone()["count"]
+            archive_scope = "material" if remaining_items == 0 else "learning_item"
+            if archive_scope == "material":
+                connection.execute(
+                    "UPDATE learning_materials SET status = 'archived', updated_at = ? WHERE material_id = ?",
+                    (timestamp, item["material_id"]),
+                )
+            event_id = self._append_event(
+                connection,
+                item["source_workflow_id"],
+                "material_archived",
+                {"material_id": item["material_id"], "archive_mode": "admin", "archive_scope": archive_scope, "reason": reason, "actor": "admin_cli"},
+                timestamp,
+            )
+            return {
+                "event_id": event_id,
+                "learning_item_id": learning_item_id,
+                "material_id": item["material_id"],
+                "title": item["title"],
+                "revision": revision_after,
+                "completed_at": timestamp,
+            }
+
     @staticmethod
     def _require_active(connection: sqlite3.Connection, workflow_id: str, workflow_type: str) -> sqlite3.Row:
         row = connection.execute("SELECT * FROM workflows WHERE workflow_id = ?", (workflow_id,)).fetchone()
@@ -814,7 +1611,7 @@ class WorkflowRepository:
         ).fetchone()["count"])
 
     @staticmethod
-    def _select_due_item(connection: sqlite3.Connection, external_session_id: str, timestamp: str) -> sqlite3.Row | None:
+    def _select_due_items(connection: sqlite3.Connection, external_session_id: str, timestamp: str) -> list[sqlite3.Row]:
         return connection.execute(
             """SELECT item.*, material.unit_type FROM learning_items AS item JOIN learning_materials AS material ON material.material_id = item.material_id
                WHERE material.source_workflow_id IN (SELECT workflow_id FROM workflows WHERE external_session_id = ? AND workflow_type = 'entry')
@@ -822,9 +1619,14 @@ class WorkflowRepository:
                  AND item.review_stage IS NOT NULL AND item.completed_at IS NULL AND item.next_review_at <= ?
                  AND NOT EXISTS (SELECT 1 FROM workflows AS existing WHERE existing.workflow_type = 'review'
                    AND existing.learning_item_id = item.learning_item_id AND existing.phase <> 'closed')
-               ORDER BY item.next_review_at, item.learning_item_id LIMIT 1""",
+               ORDER BY item.next_review_at, item.learning_item_id""",
             (external_session_id, timestamp),
-        ).fetchone()
+        ).fetchall()
+
+    @staticmethod
+    def _select_due_item(connection: sqlite3.Connection, external_session_id: str, timestamp: str) -> sqlite3.Row | None:
+        items = WorkflowRepository._select_due_items(connection, external_session_id, timestamp)
+        return items[0] if items else None
 
     @staticmethod
     def _validate_event_references(connection: sqlite3.Connection, workflow_id: str, event_type: str, data: dict[str, Any], related_event_id: str | None) -> None:

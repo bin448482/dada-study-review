@@ -5,7 +5,7 @@
 ```json
 {
   "task_contract_name": "dada.review_state_machine_turn",
-  "task_contract_version": 3,
+  "task_contract_version": 5,
   "mode": "start_review | answer_question | next_question",
   "active_mode": "review",
   "graph_node": "review_starting | review_process_answer",
@@ -15,7 +15,8 @@
     "reference_text": "...",
     "meaning_zh": "...",
     "revision": 1,
-    "unit_type": "word | phrase | sentence"
+    "unit_type": "word | phrase | sentence",
+    "review_context": null
   },
   "selected_question_mode": "...",
   "current_child_message": {"event_id": "...", "text": "..."},
@@ -33,18 +34,18 @@
 `start_review` 与 `next_question` 没有 `locked_question`；后者代表程序已按 assessment 推进到本次冻结队列的下一项，
 仍使用触发当前复习的孩子事件作为审计来源。`answer_question` 必有当前锁题。`history` 仅来自同一 workflow 的已提交事件，并带 event ID；它不是可访问的完整档案。
 
-`selected_question_mode` 由程序按 `learning_item.unit_type` 的固定允许池随机选择：单词为 `word_mask`、`spelling`、`zh_to_en`、`en_to_zh`；短语为
-`mask`、`zh_to_en`、`en_to_zh`；句子为 `mask`、`sentence_recall`、`zh_to_en`、`en_to_zh`。程序在本 workflow 已使用最少的候选中随机抽取，
+`selected_question_mode` 由程序按 `learning_item.unit_type` 的固定允许池随机选择：单词为 `spelling`、`zh_to_en`、`en_to_zh`；短语为
+`zh_to_en`；句子为 `sentence_recall`、`zh_to_en`、`en_to_zh`。程序在本 workflow 已使用最少的候选中随机抽取，
 并在有其他候选时避免紧邻重复；它不生成题面或评分。`ask_question.question_mode` 必须与该字段完全相等。
 
 当 `locked_question.question_mode` 为单词 `spelling` 时，完整且正确的单词与空格、逗号、连字符或逐条消息分隔的逐字母拼写，都是可评估作答；正确时必须返回 `complete_assessment`。题面可邀请孩子拼写，但不得将逐字母输入作为唯一接受格式。未完成、无法判断或拼写错误时，才可用 `continue_locked_question` 保留锁题并作最小引导。
 
-唯一输出为 `dada.review_state_machine_result` v3。首次或追问：
+唯一输出为 `dada.review_state_machine_result` v4。首次或追问：
 
 ```json
 {
   "contract_name": "dada.review_state_machine_result",
-  "contract_version": 3,
+  "contract_version": 4,
   "data": {
     "next_operation": "ask_question",
     "question_mode": "en_to_zh",
@@ -61,7 +62,7 @@
 ```json
 {
   "contract_name": "dada.review_state_machine_result",
-  "contract_version": 3,
+  "contract_version": 4,
   "data": {
     "next_operation": "complete_assessment",
     "assistant_response": "答得很认真，我们下次再巩固一下。",
@@ -81,14 +82,14 @@
 ```
 
 字段必须精确匹配；禁止 unknown fields。`ask_question` 只能包含 `next_operation`、`question_mode` 和
-`question_json`；其中 question_json 只能有非空 `prompt` 与可选非空 `instruction`。Graph 将 prompt 原样放在可见消息
-最前，再附 instruction；因此 ask_question 不得带 `assistant_response`。`complete_assessment` 不能带 `question_mode` 或
+`question_json`；其中 question_json 只能有非空 `prompt`、可选非空 `instruction` 和可选非空 `speech_text`。Graph 将 prompt 原样放在可见消息
+最前，再附 instruction；因此 ask_question 不得带 `assistant_response`。翻译题不得带 `speech_text`；单词 `spelling` 与句子 `sentence_recall` 必须带 `speech_text`，它仅供语音合成，绝不显示给孩子。`complete_assessment` 不能带 `question_mode` 或
 `question_json`。无关输入或尚未作答时，保持同一锁题：
 
 ```json
 {
   "contract_name": "dada.review_state_machine_result",
-  "contract_version": 3,
+  "contract_version": 4,
   "data": {
     "next_operation": "continue_locked_question",
     "assistant_response": "我们先完成这一题吧。"
@@ -103,7 +104,7 @@
 ```json
 {
   "contract_name": "dada.review_state_machine_result",
-  "contract_version": 3,
+  "contract_version": 4,
   "data": {
     "next_operation": "request_transition",
     "requested_transition": "stop_review | start_entry",
@@ -113,3 +114,8 @@
 ```
 
 `request_transition` 不能带题面或 assessment；它只是 LLM 的受控意图结果，Graph 必须验证当前状态后才可关闭或交接。权威程序校验位于 `runtime/v3_review/contracts/validation.py`；本参考不扩大合同。
+
+`learning_item.review_context` 是 phrase 的可选受限对象：新建 phrase 必须提供 `schema_version`、`purpose_zh`、`context_kind`、
+`information_slots`、`prompt_constraint_zh`、非空 `accepted_expressions` 和可空 `semantic_alternatives`。目标形式示例只供模型生成和判断
+情境化 `zh_to_en`，不能直接作为题面答案泄露。历史未回填的 phrase 可以暂时为 `null`，按 legacy 题面兼容；新建 phrase 不得为 `null`。
+phrase 的 `zh_to_en` 题面必须提供足够的具体事实填充信息槽位；孩子用注册目标形式和一致的槽位值完成表达即可通过，不要求逐字复述模板。只说语义替代表达时应说明本题仍要练习目标短语；与题面事实矛盾或缺少关键槽位时不能完成 assessment。

@@ -8,9 +8,9 @@ from typing import Callable, Iterable
 
 
 QUESTION_MODES: dict[str, tuple[str, ...]] = {
-    "word": ("word_mask", "spelling", "zh_to_en", "en_to_zh"),
-    "phrase": ("mask", "zh_to_en", "en_to_zh"),
-    "sentence": ("mask", "sentence_recall", "zh_to_en", "en_to_zh"),
+    "word": ("spelling", "zh_to_en", "en_to_zh"),
+    "phrase": ("zh_to_en",),
+    "sentence": ("sentence_recall", "zh_to_en", "en_to_zh"),
 }
 
 
@@ -41,5 +41,18 @@ def choose_question_mode(
     least_used = [mode for mode in candidates if counts[mode] == least_count]
     selected = (chooser or secrets.choice)(least_used)
     if selected not in least_used:
+        raise ValueError("question mode selector returned an invalid mode")
+    return selected
+
+
+def select_question_mode(
+    unit_type: str,
+    previous_modes: Iterable[str],
+    selector: Callable[[str, tuple[str, ...]], str],
+) -> str:
+    """Apply an injected test/composition selector within the fixed pool."""
+
+    selected = selector(unit_type, tuple(previous_modes))
+    if selected not in allowed_question_modes(unit_type):
         raise ValueError("question mode selector returned an invalid mode")
     return selected

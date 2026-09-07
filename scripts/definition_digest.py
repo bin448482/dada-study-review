@@ -17,6 +17,7 @@ class DefinitionDigestError(ValueError):
 _DEFINITION_CONTRACTS = {
     "dada-entry-state-machine": ("references/entry-turn-contract.md", "dada.entry_state_machine_turn"),
     "dada-review-state-machine": ("references/review-turn-contract.md", "dada.review_state_machine_turn"),
+    "dada-dialogue-state-machine": ("references/dialogue-turn-contract.md", "dada.dialogue_state_machine_turn"),
 }
 _CREDENTIAL_SHAPE = re.compile(r"(?:api[_-]?key|authorization|bearer\s+[a-z0-9._-]+)", re.IGNORECASE)
 

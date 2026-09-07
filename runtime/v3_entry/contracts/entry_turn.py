@@ -26,6 +26,8 @@ class EntryTurnDelivery:
 
     handled: bool
     reply_text: str | None = None
+    review_question_mode: str | None = None
+    review_question_json: dict[str, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -79,7 +81,7 @@ class EntryMaterial:
     reference_text: str
     needs_parent_review: bool
     audit_result: MaterialAudit
-    items: tuple[dict[str, str | None], ...]
+    items: tuple[dict[str, Any], ...]
 
 
 @dataclass(frozen=True)

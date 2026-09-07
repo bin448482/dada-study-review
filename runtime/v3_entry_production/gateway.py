@@ -32,6 +32,7 @@ class ProductionGatewayConfig:
     endpoint: str
     timeout_seconds: float
     api_style: str = "responses"
+    user_agent: str = ""
 
     def __post_init__(self) -> None:
         if (
@@ -40,6 +41,10 @@ class ProductionGatewayConfig:
             or not self.endpoint.startswith("https://")
             or self.timeout_seconds <= 0
             or self.api_style not in {"responses", "chat-completions"}
+            or not self.user_agent
+            or len(self.user_agent) > 256
+            or "\r" in self.user_agent
+            or "\n" in self.user_agent
         ):
             raise ValueError("production Gateway configuration is invalid")
 
@@ -47,17 +52,18 @@ class ProductionGatewayConfig:
 class UrllibBearerResponsesTransport:
     """A deployment-only transport; its bearer token is never represented in a Gateway request."""
 
-    def __init__(self, bearer_token: str, max_response_bytes: int = 256 * 1024) -> None:
-        if not bearer_token or max_response_bytes <= 0:
+    def __init__(self, bearer_token: str, user_agent: str, max_response_bytes: int = 256 * 1024) -> None:
+        if not bearer_token or not user_agent or "\r" in user_agent or "\n" in user_agent or max_response_bytes <= 0:
             raise ValueError("transport configuration is invalid")
         self._bearer_token = bearer_token
+        self._user_agent = user_agent
         self._max_response_bytes = max_response_bytes
 
     def post_json(self, endpoint: str, body: dict[str, Any], timeout_seconds: float) -> dict[str, Any]:
         request = Request(
             endpoint,
             data=json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8"),
-            headers={"Authorization": f"Bearer {self._bearer_token}", "Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {self._bearer_token}", "Content-Type": "application/json", "User-Agent": self._user_agent},
             method="POST",
         )
         try:

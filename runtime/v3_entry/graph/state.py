@@ -23,9 +23,16 @@ class EntryGraphState(TypedDict, total=False):
 class DeliveryBuffer:
     handled: bool = False
     reply_text: str | None = None
+    review_question_mode: str | None = None
+    review_question_json: dict[str, str] | None = None
 
     def delivery(self) -> EntryTurnDelivery:
-        return EntryTurnDelivery(handled=self.handled, reply_text=self.reply_text)
+        return EntryTurnDelivery(
+            handled=self.handled,
+            reply_text=self.reply_text,
+            review_question_mode=self.review_question_mode,
+            review_question_json=None if self.review_question_json is None else dict(self.review_question_json),
+        )
 
 
 @dataclass

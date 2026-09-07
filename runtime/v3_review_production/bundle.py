@@ -65,5 +65,5 @@ def load_state_machine_definition(directory: Path, definition_id: str, expected_
         raise DefinitionError("definition digest does not match the reviewed release")
     return StateMachineDefinition(
         definition_id, actual, "\n\n".join((texts["SKILL.md"], texts["references/review-turn-contract.md"])),
-        {"type": "object", "additionalProperties": False, "required": ["contract_name", "contract_version", "data"], "properties": {"contract_name": {"type": "string", "const": "dada.review_state_machine_result"}, "contract_version": {"type": "integer", "const": 3}, "data": {"type": "object"}}},
+        {"type": "object", "additionalProperties": False, "required": ["contract_name", "contract_version", "data"], "properties": {"contract_name": {"type": "string", "const": "dada.review_state_machine_result"}, "contract_version": {"type": "integer", "const": 4}, "data": {"type": "object"}}},
     )

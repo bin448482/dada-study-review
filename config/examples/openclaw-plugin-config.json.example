@@ -16,7 +16,8 @@
     "provider": "your-provider",
     "model": "your-model",
     "endpoint": "https://provider.example/v1/responses",
-    "apiStyle": "responses"
+    "apiStyle": "responses",
+    "userAgent": "dada-public-example/0.1"
   },
   "review": {
     "definitionDirectory": "/opt/dada/definitions/dada-review-state-machine",
@@ -25,6 +26,31 @@
     "model": "your-model",
     "endpoint": "https://provider.example/v1/responses",
     "apiStyle": "responses",
-    "schedulePath": "/opt/dada/config/review-schedule.json"
+    "schedulePath": "/opt/dada/config/review-schedule.json",
+    "userAgent": "dada-public-example/0.1"
+  },
+  "dialogue": {
+    "definitionDirectory": "/opt/dada/definitions/dada-dialogue-state-machine",
+    "definitionDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "provider": "your-provider",
+    "model": "your-model",
+    "endpoint": "https://provider.example/v1/responses",
+    "apiStyle": "responses",
+    "userAgent": "dada-public-example/0.1",
+    "dialogueUnitId": "grade6-english-unit-1-school-life",
+    "unitPath": "/opt/dada/config/dialogue-units/grade6-english-unit-1-school-life/unit.v1.json",
+    "policyPath": "/opt/dada/config/dialogue-policy.json",
+    "reviewSchedulePath": "/opt/dada/config/review-schedule.json"
+  },
+  "reviewTts": {
+    "provider": "volcengine_seed",
+    "enabled": false,
+    "endpoint": "https://tts.example/v1/speech",
+    "resourceId": "seed-tts-2.0",
+    "speaker": "your-approved-speaker",
+    "timeoutSeconds": 20,
+    "maxTextChars": 500,
+    "maxAudioBytes": 5242880,
+    "retentionSeconds": 300
   }
 }

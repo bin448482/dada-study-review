@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -38,7 +39,19 @@ def assessment(sequence: int, accuracy: float = 0.8) -> dict:
 
 
 def test_question_mode_selector(_unit_type: str, previous_modes: tuple[str, ...]) -> str:
-    return "zh_to_en" if previous_modes else "en_to_zh"
+    return "zh_to_en" if _unit_type == "phrase" or previous_modes else "en_to_zh"
+
+
+def phrase_review_context() -> dict:
+    return {
+        "schema_version": 1,
+        "purpose_zh": "报告自己和同伴有相同的学校生活安排",
+        "context_kind": "shared_school_routine",
+        "information_slots": ["other_person_routine", "child_same_routine"],
+        "prompt_constraint_zh": "先给出同伴事实，再要求孩子报告相同情况。",
+        "accepted_expressions": [{"kind": "target_form", "text": "I go to school at {time}, too.", "note_zh": "保持目标表达。"}],
+        "semantic_alternatives": [],
+    }
 
 
 class ReviewRuntimeTests(unittest.TestCase):
@@ -81,17 +94,15 @@ class ReviewRuntimeTests(unittest.TestCase):
     def handle(self, text: str, at: str = NOW, start: bool = False):
         return self.service.handle(AuthorizedReviewIngress(text, at, "child-1", start))
 
-    @staticmethod
-    def with_review_volume(total: int, remaining: int, text: str) -> str:
-        return f"这轮有 {total} 题需要复习，现在还剩 {remaining} 题（含当前题）。\n\n{text}"
-
     def start(self) -> str:
         self.gateway._executions.append(question_result("en_to_zh", {"prompt": "I go to school.", "instruction": "请说出这句话的中文意思。"}))
         delivery = self.handle("开始复习", start=True)
         workflow = self.repository.get_active_workflow("child-1", "review")
         self.assertIsNotNone(workflow)
         progress = self.repository.get_review_queue_progress(workflow["workflow_id"])
-        self.assertEqual(delivery.reply_text, self.with_review_volume(progress["total"], progress["remaining"], "I go to school.\n\n请说出这句话的中文意思。"))
+        self.assertEqual(delivery.progress_text, f"这轮共 {progress['total']} 题，现在从第 1 题开始。")
+        self.assertEqual(delivery.speech_text, "I go to school.\n\n请说出这句话的中文意思。")
+        self.assertEqual(delivery.reply_text, "I go to school.\n\n请说出这句话的中文意思。")
         return workflow["workflow_id"]
 
     def test_start_locks_question_only_after_events_commit(self) -> None:
@@ -104,19 +115,65 @@ class ReviewRuntimeTests(unittest.TestCase):
         locked = next(event for event in events if event["event_type"] == "question_locked")
         delivered = next(event for event in events if event["event_type"] == "assistant_response")
         self.assertEqual(locked["payload"]["question_json"], {"prompt": "I go to school.", "instruction": "请说出这句话的中文意思。"})
-        self.assertEqual(delivered["payload"]["text"], self.with_review_volume(1, 1, "I go to school.\n\n请说出这句话的中文意思。"))
+        self.assertEqual(delivered["payload"]["text"], "这轮共 1 题，现在从第 1 题开始。\n\nI go to school.\n\n请说出这句话的中文意思。")
         self.assertEqual(self.gateway.prepared_turns[0].mode, "start_review")
-        self.assertEqual((self.gateway.prepared_turns[0].task_contract_version, self.gateway.prepared_turns[0].selected_question_mode), (3, "en_to_zh"))
+        self.assertEqual((self.gateway.prepared_turns[0].task_contract_version, self.gateway.prepared_turns[0].selected_question_mode), (5, "en_to_zh"))
         self.assertEqual(self.gateway.prepared_turns[0].history[-1]["event_type"], "child_message")
 
     def test_program_question_mode_pools_are_fixed_and_balanced_random(self) -> None:
-        self.assertEqual(allowed_question_modes("word"), ("word_mask", "spelling", "zh_to_en", "en_to_zh"))
-        self.assertEqual(allowed_question_modes("phrase"), ("mask", "zh_to_en", "en_to_zh"))
-        self.assertEqual(allowed_question_modes("sentence"), ("mask", "sentence_recall", "zh_to_en", "en_to_zh"))
+        self.assertEqual(allowed_question_modes("word"), ("spelling", "zh_to_en", "en_to_zh"))
+        self.assertEqual(allowed_question_modes("phrase"), ("zh_to_en",))
+        self.assertEqual(allowed_question_modes("sentence"), ("sentence_recall", "zh_to_en", "en_to_zh"))
         first = lambda candidates: candidates[0]
-        self.assertEqual(choose_question_mode("word", (), first), "word_mask")
-        self.assertEqual(choose_question_mode("word", ("word_mask",), first), "spelling")
-        self.assertEqual(choose_question_mode("word", ("word_mask", "spelling", "zh_to_en", "en_to_zh"), first), "word_mask")
+        self.assertEqual(choose_question_mode("word", (), first), "spelling")
+        self.assertEqual(choose_question_mode("word", ("spelling",), first), "zh_to_en")
+        self.assertEqual(choose_question_mode("word", ("spelling", "zh_to_en", "en_to_zh"), first), "spelling")
+
+    def test_phrase_review_context_is_frozen_into_review_turn(self) -> None:
+        with sqlite3.connect(self.path) as connection:
+            connection.execute("""INSERT INTO learning_materials(material_id, source_workflow_id, status, title, language, unit_type,
+                reference_text, needs_parent_review, audit_result_json, created_at, updated_at)
+                VALUES ('material-phrase', 'entry-1', 'active', '短语', 'en', 'phrase', '... too.', 0, '{}', ?, ?)""", (NOW, NOW))
+            connection.execute("""INSERT INTO learning_items(learning_item_id, material_id, item_order, reference_text, meaning_zh,
+                review_context_json, review_stage, next_review_at, completed_at, revision, created_at, updated_at)
+                VALUES ('a-phrase', 'material-phrase', 1, '... too.', '……也是如此。', ?, 0, '2026-08-22T23:58:00Z', NULL, 1, ?, ?)""", (json.dumps(phrase_review_context(), ensure_ascii=False), NOW, NOW))
+        self.service.close()
+        self.gateway = FakeReviewModelGateway([question_result("zh_to_en", {"prompt": "你的同学说：I go to school at 7 a.m.\n你也一样，请用英语报告。", "instruction": "请用英语回答。"})])
+        self.service = ReviewTurnService(self.path, self.gateway, "固定复习状态机提示", self.policy, "固定录入状态机提示", lambda _unit, _previous: "zh_to_en")
+        delivery = self.handle("开始复习", start=True)
+        self.assertIn("请用英语回答", delivery.reply_text)
+        turn = self.gateway.prepared_turns[0].as_request()
+        self.assertEqual(turn["task_contract_version"], 5)
+        self.assertEqual(turn["selected_question_mode"], "zh_to_en")
+        self.assertEqual(turn["learning_item"]["review_context"], phrase_review_context())
+
+    def test_v4_spelling_locks_hidden_speech_text_for_audio_delivery(self) -> None:
+        with sqlite3.connect(self.path) as connection:
+            connection.execute("""INSERT INTO learning_materials(material_id, source_workflow_id, status, title, language, unit_type,
+                reference_text, needs_parent_review, audit_result_json, created_at, updated_at)
+                VALUES ('material-word', 'entry-1', 'active', '单词', 'en', 'word', 'school', 0, '{}', ?, ?)""", (NOW, NOW))
+            connection.execute("""INSERT INTO learning_items(learning_item_id, material_id, item_order, reference_text, meaning_zh,
+                review_stage, next_review_at, completed_at, revision, created_at, updated_at)
+                VALUES ('a-word', 'material-word', 1, 'school', '学校', 0, '2026-08-22T23:58:00Z', NULL, 1, ?, ?)""", (NOW, NOW))
+        self.service.close()
+        gateway = FakeReviewModelGateway([
+            question_result("spelling", {"prompt": "请听音后输入完整英文单词。", "speech_text": "school"}),
+        ])
+        self.service = ReviewTurnService(self.path, gateway, "固定复习状态机提示", self.policy, "固定录入状态机提示", lambda _unit, _previous: "spelling")
+        delivery = self.handle("开始复习", start=True)
+        self.assertEqual(delivery.question_mode, "spelling")
+        self.assertEqual(delivery.question_json, {"prompt": "请听音后输入完整英文单词。", "speech_text": "school"})
+        self.assertNotIn("school", delivery.reply_text)
+
+    def test_v4_sentence_recall_rejects_missing_speech_text(self) -> None:
+        self.gateway._executions.extend([
+            question_result("sentence_recall", {"prompt": "请听完后复述这句话。"}),
+            question_result("sentence_recall", {"prompt": "请听完后复述这句话。"}),
+        ])
+        self.service.close()
+        self.service = ReviewTurnService(self.path, self.gateway, "固定复习状态机提示", self.policy, "固定录入状态机提示", lambda _unit, _previous: "sentence_recall")
+        delivery = self.handle("开始复习", start=True)
+        self.assertEqual(delivery.reply_text, "刚才没有处理成功，请再明确说一次“开始复习”。")
 
     def test_two_model_question_mode_mismatches_end_with_persisted_retry_reply(self) -> None:
         self.gateway._executions.append(question_result("zh_to_en", {"prompt": "我去上学。", "instruction": "请写英文。"}))
@@ -132,6 +189,7 @@ class ReviewRuntimeTests(unittest.TestCase):
         self.gateway._executions.append(assessment_result("答得不错，明天再来。", assessment(1)))
         delivery = self.handle("我去上学。", "2026-08-23T00:01:00Z")
         self.assertEqual(delivery.reply_text, "答得不错，明天再来。")
+        self.assertEqual(delivery.progress_text, "这轮 1 题已完成。")
         self.assertEqual(self.repository.get_workflow(workflow_id)["phase"], "closed")
         with sqlite3.connect(self.path) as connection:
             item = connection.execute("SELECT review_stage, next_review_at, completed_at, revision FROM learning_items WHERE learning_item_id = 'item-1'").fetchone()
@@ -147,9 +205,10 @@ class ReviewRuntimeTests(unittest.TestCase):
             question_result("zh_to_en", {"prompt": "我喜欢苹果。", "instruction": "请说英文意思。"}),
         ])
         review_id = self.handle("开始复习", start=True)
-        self.assertEqual(review_id.reply_text, self.with_review_volume(2, 2, "I go to school.\n\n请说中文意思。"))
+        self.assertEqual(review_id.reply_text, "I go to school.\n\n请说中文意思。")
         delivery = self.handle("我去上学。", "2026-08-23T00:01:00Z")
-        self.assertEqual(delivery.reply_text, self.with_review_volume(2, 1, "答得很棒！\n\n我喜欢苹果。\n\n请说英文意思。"))
+        self.assertEqual(delivery.reply_text, "答得很棒！\n\n我喜欢苹果。\n\n请说英文意思。")
+        self.assertEqual(delivery.progress_text, "第 2 / 2 题，还剩 1 题。")
         workflow = self.repository.get_active_workflow("child-1", "review")
         self.assertIsNotNone(workflow)
         self.assertEqual((workflow["learning_item_id"], workflow["question_sequence"]), ("item-2", 2))
@@ -187,7 +246,7 @@ class ReviewRuntimeTests(unittest.TestCase):
                 assessment_result(f"第 {index} 次答对。", assessment(1, 1.0)),
             ])
             start = self.handle("开始复习", at, start=True)
-            self.assertEqual(start.reply_text, self.with_review_volume(1, 1, "I go to school.\n\n请说中文意思。"))
+            self.assertEqual(start.reply_text, "I go to school.\n\n请说中文意思。")
             completed = self.handle("我去上学。", at)
             self.assertEqual(completed.reply_text, f"第 {index} 次答对。")
             with sqlite3.connect(self.path) as connection:
@@ -261,7 +320,7 @@ class ReviewRuntimeTests(unittest.TestCase):
         workflow_id = self.start()
         self.gateway._executions.append(locked_question_guidance_result("现在正在复习。先回答当前这题；其他问题可以复习结束后再问。"))
         delivery = self.handle("我想吃冰淇淋。", "2026-08-23T00:01:00Z")
-        self.assertEqual(delivery.reply_text, f"现在正在复习。先回答当前这题；其他问题可以复习结束后再问。\n\n{self.with_review_volume(1, 1, 'I go to school.\n\n请说出这句话的中文意思。')}")
+        self.assertEqual(delivery.reply_text, "现在正在复习。先回答当前这题；其他问题可以复习结束后再问。\n\nI go to school.\n\n请说出这句话的中文意思。")
         with sqlite3.connect(self.path) as connection:
             item = connection.execute("SELECT review_stage, next_review_at, completed_at, revision FROM learning_items WHERE learning_item_id = 'item-1'").fetchone()
             queue = connection.execute("SELECT status, completed_at FROM review_queue_items WHERE workflow_id = ? AND learning_item_id = 'item-1'", (workflow_id,)).fetchone()
@@ -270,7 +329,7 @@ class ReviewRuntimeTests(unittest.TestCase):
         events = self.repository.list_events(workflow_id)
         self.assertFalse(any(event["event_type"] == "schedule_applied" for event in events))
         self.assertEqual(events[-1]["event_type"], "assistant_response")
-        self.assertEqual(events[-1]["payload"]["text"], delivery.reply_text)
+        self.assertEqual(events[-1]["payload"]["text"], f"现在正在复习。先回答当前这题；其他问题可以复习结束后再问。\n\n这轮共 1 题，现在从第 1 题开始。\n\nI go to school.\n\n请说出这句话的中文意思。")
 
         self.gateway._executions.append(assessment_result("这次答对了。", assessment(1)))
         completed = self.handle("我去上学。", "2026-08-23T00:02:00Z")
@@ -305,7 +364,7 @@ class ReviewRuntimeTests(unittest.TestCase):
         ])
         self.handle("开始复习", start=True)
         test_delivery = self.service.handle(AuthorizedReviewIngress("开始复习", NOW, "child-test", True))
-        self.assertEqual(test_delivery.reply_text, self.with_review_volume(1, 1, "I like apples.\n\n请说出第二句的中文意思。"))
+        self.assertEqual(test_delivery.reply_text, "I like apples.\n\n请说出第二句的中文意思。")
         self.assertEqual(self.repository.get_active_workflow("child-1", "review")["learning_item_id"], "item-1")
         self.assertEqual(self.repository.get_active_workflow("child-test", "review")["learning_item_id"], "item-test")
 
@@ -361,7 +420,7 @@ class ReviewRuntimeTests(unittest.TestCase):
             GatewayError("offline"),
             GatewayError("offline"),
         ])
-        self.assertEqual(self.handle("开始复习", start=True).reply_text, self.with_review_volume(2, 2, "I go to school.\n\n请说中文意思。"))
+        self.assertEqual(self.handle("开始复习", start=True).reply_text, "I go to school.\n\n请说中文意思。")
         self.assertEqual(self.handle("我去上学。", "2026-08-23T00:01:00Z").reply_text, "刚才没有处理成功，请再明确说一次“开始复习”。")
         workflow = self.repository.get_active_workflow("child-1", "review")
         self.assertIsNotNone(workflow)
@@ -369,7 +428,7 @@ class ReviewRuntimeTests(unittest.TestCase):
 
         self.gateway._executions.append(question_result("zh_to_en", {"prompt": "我喜欢苹果。", "instruction": "请说英文意思。"}))
         delivery = self.handle("继续复习", "2026-08-23T00:02:00Z")
-        self.assertEqual(delivery.reply_text, self.with_review_volume(2, 1, "我喜欢苹果。\n\n请说英文意思。"))
+        self.assertEqual(delivery.reply_text, "我喜欢苹果。\n\n请说英文意思。")
         self.assertEqual(self.gateway.prepared_turns[-1].mode, "next_question")
 
     def test_two_blank_question_outputs_end_with_retry_reply_without_lock(self) -> None:
@@ -385,7 +444,7 @@ class ReviewRuntimeTests(unittest.TestCase):
     def test_question_without_instruction_sends_prompt_only(self) -> None:
         self.gateway._executions.append(question_result("en_to_zh", {"prompt": "I go to school."}))
         delivery = self.handle("开始复习", start=True)
-        self.assertEqual(delivery.reply_text, self.with_review_volume(1, 1, "I go to school."))
+        self.assertEqual(delivery.reply_text, "I go to school.")
 
     def test_v2_question_result_remains_readable_but_uses_locked_prompt_for_delivery(self) -> None:
         self.gateway._executions.append(ReviewGatewayExecution({
@@ -393,10 +452,10 @@ class ReviewRuntimeTests(unittest.TestCase):
             "data": {"next_operation": "ask_question", "question_mode": "en_to_zh", "question_json": {"prompt": "I go to school."}, "assistant_response": "旧版提示"},
         }))
         delivery = self.handle("开始复习", start=True)
-        self.assertEqual(delivery.reply_text, self.with_review_volume(1, 1, "I go to school."))
+        self.assertEqual(delivery.reply_text, "I go to school.")
         workflow = self.repository.get_active_workflow("child-1", "review")
         event = next(event for event in self.repository.list_events(workflow["workflow_id"]) if event["event_type"] == "assistant_response")
-        self.assertEqual(event["payload"]["text"], self.with_review_volume(1, 1, "I go to school."))
+        self.assertEqual(event["payload"]["text"], "这轮共 1 题，现在从第 1 题开始。\n\nI go to school.")
 
     def test_model_can_ask_a_second_question_with_same_workflow_history(self) -> None:
         workflow_id = self.start()
@@ -461,7 +520,7 @@ class ReviewRuntimeTests(unittest.TestCase):
             connection.execute("UPDATE workflows SET phase = 'closed', closed_at = '2026-08-23T00:02:00Z' WHERE workflow_type = 'entry' AND phase = 'active'")
         self.gateway._executions.append(question_result("zh_to_en", {"prompt": "我去上学。", "instruction": "继续这一题。"}))
         delivery = self.handle("开始复习", "2026-08-23T00:03:00Z", start=True)
-        self.assertEqual(delivery.reply_text, self.with_review_volume(1, 1, "我去上学。\n\n继续这一题。"))
+        self.assertEqual(delivery.reply_text, "我去上学。\n\n继续这一题。")
         resumed = self.repository.get_active_workflow("child-1", "review")
         self.assertEqual(resumed["workflow_id"], review_id)
         self.assertEqual(resumed["question_sequence"], 2)
@@ -476,7 +535,7 @@ class ReviewRuntimeTests(unittest.TestCase):
         self.service = ReviewTurnService(self.path, self.gateway, "固定复习状态机提示", self.policy, "固定录入状态机提示", test_question_mode_selector)
         delivery = self.handle("我的回答", "2026-08-23T00:01:00Z")
         self.assertTrue(delivery.handled)
-        self.assertEqual(delivery.reply_text, self.with_review_volume(1, 1, "I go to school.\n\n请说出这句话的中文意思。"))
+        self.assertEqual(delivery.reply_text, "I go to school.\n\n请说出这句话的中文意思。")
         self.assertEqual(len(self.gateway.prepared_turns), 1)
         self.assertEqual(self.repository.get_review_context(workflow_id)["locked_question_mode"], "en_to_zh")
 

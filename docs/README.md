@@ -9,5 +9,8 @@ This documentation describes the reusable reference implementation. It deliberat
 5. [Architecture decisions](ARCHITECTURE_DECISIONS.md)
 6. [Development and testing](DEVELOPMENT_AND_TESTING.md)
 7. [OpenClaw integration](OPENCLAW_INTEGRATION.md)
+8. [Optional TTS](TTS.md)
+
+The public runtime also includes the Dialogue workflow and its minimal versioned Unit package. Textbook screenshots, transcription inputs, candidate-generation history, and household curriculum data are not included.
 
 The included OpenClaw material is a generic integration reference, not a deployment recipe. Operators must supply their own static authorization mapping, archive location, model configuration, and secret handling.

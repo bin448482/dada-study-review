@@ -16,12 +16,12 @@
 
 `pending_reentry_requests` 始终是数组；每项仅含 `event_id`、`guidance` 与可空 `unit_type`。它不是完整历史，也不是可自由访问的档案。
 
-唯一输出为 `dada.entry_state_machine_result` v2。普通 `reply_only`：
+唯一输出为 `dada.entry_state_machine_result` v3。普通 `reply_only`：
 
 ```json
 {
   "contract_name": "dada.entry_state_machine_result",
-  "contract_version": 2,
+  "contract_version": 3,
   "data": {
     "assistant_response": "现在开始录入啦，请一行一条发给我。",
     "next_operation": "reply_only",
@@ -36,13 +36,13 @@
 ```json
 {
   "contract_name": "dada.entry_state_machine_result",
-  "contract_version": 2,
+  "contract_version": 3,
   "data": {
     "assistant_response": "这一句已经收好啦。",
     "next_operation": "record_entry_audit",
     "entry_audit": {
       "contract_name": "dada.entry_audit",
-      "contract_version": 2,
+      "contract_version": 3,
       "data": {
         "materials": [{
           "title": "学校句子",
@@ -74,7 +74,7 @@
 }
 ```
 
-字段必须精确匹配；禁止 unknown fields。`record_entry_audit` 只能包含示例中的 `assistant_response`、`next_operation` 和 `entry_audit`，不得附带 `guidance_kind` 或 `requested_transition`（运行时仅为已发布旧输出兼容两者都为 `null` 的情况）。`start_entry` 不能返回 `record_entry_audit`，且 `guidance_kind` 与 `requested_transition` 必须都是 `null`。
+字段必须精确匹配；禁止 unknown fields。`record_entry_audit` 只能包含示例中的 `assistant_response`、`next_operation` 和 `entry_audit`，不得附带 `guidance_kind` 或 `requested_transition`（运行时仅为已发布旧输出兼容两者都为 `null` 的情况）。v3 的 phrase 学习项必须增加 `review_context`，其结构必须符合 Review 上下文合同；word/sentence 学习项仍使用原字段。`start_entry` 不能返回 `record_entry_audit`，且 `guidance_kind` 与 `requested_transition` 必须都是 `null`。
 `collect_message` 的非审核引导只能返回 `reply_only` + `guidance_kind:"entry_guidance"`；自然完成意图只能返回 `reply_only` +
 `requested_transition` 仅可为 `"finish_entry"` 或 `"start_review"`，二者不能同时出现。它们都是 LLM 的受控请求，不是已发生的状态改变；Graph 必须二次验证并提交。`reentry_requests` 中每项只允许 `guidance` 和可空的 `unit_type`；
 `materials` 或 `reentry_requests` 至少一个非空。`resolved_reentry_request_ids` 只能引用输入中尚未解决的 ID，且不得重复。权威程序校验位于

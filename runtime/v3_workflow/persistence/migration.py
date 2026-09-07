@@ -16,6 +16,300 @@ class MigrationError(RuntimeError):
 LEGACY_TABLES = ("entry_workflows", "entry_log_events", "learning_materials", "learning_items")
 
 
+def migrate_dialogue_schema(database_path: Path) -> None:
+    """Explicitly extend one existing v3 archive for Dialogue workflows.
+
+    SQLite cannot extend the existing `workflows` and event-type CHECK
+    constraints in place.  This never runs during service construction: a
+    selected archive is preflighted, rebuilt in one transaction, and verified
+    before it becomes visible.
+    """
+
+    path = Path(database_path)
+    connection = sqlite3.connect(path)
+    connection.row_factory = sqlite3.Row
+    try:
+        # The parent workflows table is referenced by existing fact tables.
+        # Foreign keys are re-enabled and checked before committing the rebuilt
+        # table under its original name.
+        connection.execute("PRAGMA foreign_keys = OFF")
+        connection.execute("BEGIN IMMEDIATE")
+        _preflight_dialogue_schema(connection)
+        before_workflows = [tuple(row) for row in connection.execute(
+            """SELECT workflow_id, external_session_id, workflow_type, phase, learning_item_id,
+                      question_sequence, locked_question_mode, locked_question_json,
+                      locked_item_revision, locked_at, started_at, paused_at, closed_at
+               FROM workflows ORDER BY workflow_id"""
+        )]
+        before_events = [tuple(row) for row in connection.execute(
+            """SELECT event_id, workflow_id, sequence_no, event_type, related_event_id,
+                      payload_json, created_at FROM workflow_log_events
+               ORDER BY workflow_id, sequence_no"""
+        )]
+        _rebuild_workflows_for_dialogue(connection)
+        _rebuild_events_for_dialogue(connection)
+        initialize_schema(connection)
+        after_workflows = [tuple(row) for row in connection.execute(
+            """SELECT workflow_id, external_session_id, workflow_type, phase, learning_item_id,
+                      question_sequence, locked_question_mode, locked_question_json,
+                      locked_item_revision, locked_at, started_at, paused_at, closed_at
+               FROM workflows ORDER BY workflow_id"""
+        )]
+        after_events = [tuple(row) for row in connection.execute(
+            """SELECT event_id, workflow_id, sequence_no, event_type, related_event_id,
+                      payload_json, created_at FROM workflow_log_events
+               ORDER BY workflow_id, sequence_no"""
+        )]
+        if before_workflows != after_workflows or before_events != after_events:
+            raise MigrationError("dialogue schema migration did not preserve existing workflow facts")
+        if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+            raise MigrationError("dialogue schema migration introduced a foreign-key violation")
+        integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
+        if integrity != "ok":
+            raise MigrationError("dialogue schema migration failed integrity check")
+        connection.commit()
+    except BaseException:
+        connection.rollback()
+        raise
+    finally:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.close()
+
+
+def migrate_dialogue_round_schema(database_path: Path) -> None:
+    """Explicitly add round-plan event types to an already Dialogue archive."""
+
+    path = Path(database_path)
+    connection = sqlite3.connect(path)
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute("PRAGMA foreign_keys = OFF")
+        connection.execute("BEGIN IMMEDIATE")
+        tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        if "workflows" not in tables or "workflow_log_events" not in tables or "dialogue_workflow_state" not in tables:
+            raise MigrationError("dialogue schema is not present")
+        event_sql = str(connection.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='workflow_log_events'").fetchone()[0] or "")
+        if "dialogue_round_planned" in event_sql:
+            raise MigrationError("dialogue round schema is already migrated")
+        before = [tuple(row) for row in connection.execute("SELECT event_id, workflow_id, sequence_no, event_type, related_event_id, payload_json, created_at FROM workflow_log_events ORDER BY workflow_id, sequence_no")]
+        connection.execute(
+            """CREATE TABLE workflow_log_events_round_new (
+              event_id TEXT PRIMARY KEY,
+              workflow_id TEXT NOT NULL REFERENCES workflows(workflow_id),
+              sequence_no INTEGER NOT NULL CHECK (sequence_no > 0),
+              event_type TEXT NOT NULL CHECK (event_type IN (
+                'system_prompt', 'child_message', 'llm_request', 'internal_reasoning',
+                'internal_reasoning_unavailable', 'tool_call', 'tool_result', 'llm_response',
+                'model_turn_attempt_failed', 'assistant_response', 'state_transition',
+                'reentry_requested', 'reentry_resolved', 'question_locked', 'question_released',
+                'schedule_applied', 'material_archived', 'dialogue_turn_evaluated',
+                'dialogue_capture_committed', 'dialogue_wrapping_started', 'dialogue_batch_ready',
+                'unit_course_passed', 'dialogue_round_planned', 'dialogue_question_intent_used',
+                'dialogue_progress_checkpoint', 'dialogue_round_completed', 'dialogue_target_reopened'
+              )),
+              related_event_id TEXT REFERENCES workflow_log_events_round_new(event_id),
+              payload_json TEXT NOT NULL CHECK (json_valid(payload_json)),
+              created_at TEXT NOT NULL,
+              UNIQUE (workflow_id, sequence_no),
+              CHECK ((event_type = 'reentry_resolved' AND related_event_id IS NOT NULL) OR (event_type <> 'reentry_resolved' AND related_event_id IS NULL))
+            )"""
+        )
+        connection.execute("INSERT INTO workflow_log_events_round_new SELECT * FROM workflow_log_events")
+        connection.execute("DROP TABLE workflow_log_events")
+        connection.execute("ALTER TABLE workflow_log_events_round_new RENAME TO workflow_log_events")
+        initialize_schema(connection)
+        after = [tuple(row) for row in connection.execute("SELECT event_id, workflow_id, sequence_no, event_type, related_event_id, payload_json, created_at FROM workflow_log_events ORDER BY workflow_id, sequence_no")]
+        if before != after:
+            raise MigrationError("dialogue round migration did not preserve events")
+        if connection.execute("PRAGMA foreign_key_check").fetchone() is not None or connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+            raise MigrationError("dialogue round migration failed integrity checks")
+        connection.commit()
+    except BaseException:
+        connection.rollback()
+        raise
+    finally:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.close()
+
+
+def migrate_dialogue_target_identity_schema(database_path: Path) -> None:
+    """Explicitly add the audited target-reopen event to a Dialogue archive."""
+
+    path = Path(database_path)
+    connection = sqlite3.connect(path)
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute("PRAGMA foreign_keys = OFF")
+        connection.execute("BEGIN IMMEDIATE")
+        tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        if {"workflows", "workflow_log_events", "dialogue_workflow_state"} - tables:
+            raise MigrationError("dialogue schema is not present")
+        event_sql = str(connection.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='workflow_log_events'"
+        ).fetchone()[0] or "")
+        if "dialogue_target_reopened" in event_sql:
+            raise MigrationError("target identity schema is already migrated")
+        if "dialogue_round_completed" not in event_sql:
+            raise MigrationError("dialogue round schema is required before target identity migration")
+        before = [tuple(row) for row in connection.execute(
+            "SELECT event_id, workflow_id, sequence_no, event_type, related_event_id, payload_json, created_at "
+            "FROM workflow_log_events ORDER BY workflow_id, sequence_no"
+        )]
+        connection.execute(
+            """CREATE TABLE workflow_log_events_target_identity_new (
+              event_id TEXT PRIMARY KEY,
+              workflow_id TEXT NOT NULL REFERENCES workflows(workflow_id),
+              sequence_no INTEGER NOT NULL CHECK (sequence_no > 0),
+              event_type TEXT NOT NULL CHECK (event_type IN (
+                'system_prompt', 'child_message', 'llm_request', 'internal_reasoning',
+                'internal_reasoning_unavailable', 'tool_call', 'tool_result', 'llm_response',
+                'model_turn_attempt_failed', 'assistant_response', 'state_transition',
+                'reentry_requested', 'reentry_resolved', 'question_locked', 'question_released',
+                'schedule_applied', 'material_archived', 'dialogue_turn_evaluated',
+                'dialogue_capture_committed', 'dialogue_wrapping_started', 'dialogue_batch_ready',
+                'unit_course_passed', 'dialogue_round_planned', 'dialogue_question_intent_used',
+                'dialogue_progress_checkpoint', 'dialogue_round_completed', 'dialogue_target_reopened'
+              )),
+              related_event_id TEXT REFERENCES workflow_log_events_target_identity_new(event_id),
+              payload_json TEXT NOT NULL CHECK (json_valid(payload_json)),
+              created_at TEXT NOT NULL,
+              UNIQUE (workflow_id, sequence_no),
+              CHECK ((event_type = 'reentry_resolved' AND related_event_id IS NOT NULL) OR
+                     (event_type <> 'reentry_resolved' AND related_event_id IS NULL))
+            )"""
+        )
+        connection.execute(
+            """INSERT INTO workflow_log_events_target_identity_new(
+                 event_id, workflow_id, sequence_no, event_type, related_event_id, payload_json, created_at
+               ) SELECT event_id, workflow_id, sequence_no, event_type, related_event_id, payload_json, created_at
+                 FROM workflow_log_events ORDER BY workflow_id, sequence_no"""
+        )
+        connection.execute("DROP TABLE workflow_log_events")
+        connection.execute("ALTER TABLE workflow_log_events_target_identity_new RENAME TO workflow_log_events")
+        initialize_schema(connection)
+        after = [tuple(row) for row in connection.execute(
+            "SELECT event_id, workflow_id, sequence_no, event_type, related_event_id, payload_json, created_at "
+            "FROM workflow_log_events ORDER BY workflow_id, sequence_no"
+        )]
+        if before != after:
+            raise MigrationError("target identity migration did not preserve events")
+        if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+            raise MigrationError("target identity migration introduced a foreign-key violation")
+        if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+            raise MigrationError("target identity migration failed integrity checks")
+        connection.commit()
+    except BaseException:
+        connection.rollback()
+        raise
+    finally:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.close()
+
+
+def _preflight_dialogue_schema(connection: sqlite3.Connection) -> None:
+    tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+    if {"workflows", "workflow_log_events"} - tables:
+        raise MigrationError("v3 workflow tables are missing")
+    if {"dialogue_workflow_state", "dialogue_review_batches", "dialogue_review_batch_items"} & tables:
+        raise MigrationError("dialogue schema is already migrated")
+    workflow_sql = str(connection.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'workflows'"
+    ).fetchone()[0] or "")
+    event_sql = str(connection.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'workflow_log_events'"
+    ).fetchone()[0] or "")
+    if "workflow_type" not in workflow_sql or "entry" not in workflow_sql or "review" not in workflow_sql:
+        raise MigrationError("workflows table is not a supported v3 schema")
+    if "event_type" not in event_sql or "state_transition" not in event_sql:
+        raise MigrationError("workflow event table is not a supported v3 schema")
+    if "dialogue" in workflow_sql or "dialogue_turn_evaluated" in event_sql:
+        raise MigrationError("dialogue schema is partially migrated")
+    if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+        raise MigrationError("v3 archive has foreign-key violations")
+    integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
+    if integrity != "ok":
+        raise MigrationError("v3 archive failed integrity check")
+
+
+def _rebuild_workflows_for_dialogue(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """CREATE TABLE workflows_dialogue_new (
+          workflow_id TEXT PRIMARY KEY,
+          external_session_id TEXT NOT NULL,
+          workflow_type TEXT NOT NULL CHECK (workflow_type IN ('entry', 'review', 'dialogue')),
+          phase TEXT NOT NULL CHECK (phase IN ('active', 'paused_for_entry', 'closed')),
+          learning_item_id TEXT REFERENCES learning_items(learning_item_id),
+          question_sequence INTEGER NOT NULL DEFAULT 0 CHECK (question_sequence >= 0),
+          locked_question_mode TEXT,
+          locked_question_json TEXT CHECK (locked_question_json IS NULL OR json_valid(locked_question_json)),
+          locked_item_revision INTEGER CHECK (locked_item_revision IS NULL OR locked_item_revision > 0),
+          locked_at TEXT,
+          started_at TEXT NOT NULL,
+          paused_at TEXT,
+          closed_at TEXT,
+          CHECK ((workflow_type IN ('entry', 'dialogue') AND learning_item_id IS NULL) OR
+                 (workflow_type = 'review' AND learning_item_id IS NOT NULL)),
+          CHECK (workflow_type = 'review' OR
+                 (question_sequence = 0 AND locked_question_mode IS NULL AND locked_question_json IS NULL
+                  AND locked_item_revision IS NULL AND locked_at IS NULL)),
+          CHECK ((locked_question_mode IS NULL AND locked_question_json IS NULL AND locked_item_revision IS NULL AND locked_at IS NULL)
+                 OR (locked_question_mode IS NOT NULL AND locked_question_json IS NOT NULL
+                     AND locked_item_revision IS NOT NULL AND locked_at IS NOT NULL)),
+          CHECK (locked_question_mode IS NULL OR question_sequence > 0),
+          CHECK ((phase = 'active' AND paused_at IS NULL AND closed_at IS NULL)
+                 OR (phase = 'paused_for_entry' AND workflow_type = 'review' AND paused_at IS NOT NULL AND closed_at IS NULL)
+                 OR (phase = 'closed' AND closed_at IS NOT NULL AND locked_question_mode IS NULL
+                     AND locked_question_json IS NULL AND locked_item_revision IS NULL AND locked_at IS NULL))
+        )"""
+    )
+    connection.execute(
+        """INSERT INTO workflows_dialogue_new(
+             workflow_id, external_session_id, workflow_type, phase, learning_item_id,
+             question_sequence, locked_question_mode, locked_question_json,
+             locked_item_revision, locked_at, started_at, paused_at, closed_at
+           ) SELECT workflow_id, external_session_id, workflow_type, phase, learning_item_id,
+                    question_sequence, locked_question_mode, locked_question_json,
+                    locked_item_revision, locked_at, started_at, paused_at, closed_at
+             FROM workflows ORDER BY workflow_id"""
+    )
+    connection.execute("DROP TABLE workflows")
+    connection.execute("ALTER TABLE workflows_dialogue_new RENAME TO workflows")
+
+
+def _rebuild_events_for_dialogue(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """CREATE TABLE workflow_log_events_dialogue_new (
+          event_id TEXT PRIMARY KEY,
+          workflow_id TEXT NOT NULL REFERENCES workflows(workflow_id),
+          sequence_no INTEGER NOT NULL CHECK (sequence_no > 0),
+          event_type TEXT NOT NULL CHECK (event_type IN (
+            'system_prompt', 'child_message', 'llm_request', 'internal_reasoning',
+            'internal_reasoning_unavailable', 'tool_call', 'tool_result', 'llm_response',
+            'model_turn_attempt_failed', 'assistant_response', 'state_transition',
+            'reentry_requested', 'reentry_resolved', 'question_locked', 'question_released',
+            'schedule_applied', 'material_archived', 'dialogue_turn_evaluated',
+            'dialogue_capture_committed', 'dialogue_wrapping_started', 'dialogue_batch_ready',
+            'unit_course_passed', 'dialogue_round_planned', 'dialogue_question_intent_used',
+            'dialogue_progress_checkpoint', 'dialogue_round_completed', 'dialogue_target_reopened'
+          )),
+          related_event_id TEXT REFERENCES workflow_log_events_dialogue_new(event_id),
+          payload_json TEXT NOT NULL CHECK (json_valid(payload_json)),
+          created_at TEXT NOT NULL,
+          UNIQUE (workflow_id, sequence_no),
+          CHECK ((event_type = 'reentry_resolved' AND related_event_id IS NOT NULL) OR
+                 (event_type <> 'reentry_resolved' AND related_event_id IS NULL))
+        )"""
+    )
+    connection.execute(
+        """INSERT INTO workflow_log_events_dialogue_new(
+             event_id, workflow_id, sequence_no, event_type, related_event_id, payload_json, created_at
+           ) SELECT event_id, workflow_id, sequence_no, event_type, related_event_id, payload_json, created_at
+             FROM workflow_log_events ORDER BY workflow_id, sequence_no"""
+    )
+    connection.execute("DROP TABLE workflow_log_events")
+    connection.execute("ALTER TABLE workflow_log_events_dialogue_new RENAME TO workflow_log_events")
+
+
 def migrate_model_turn_event_schema(database_path: Path) -> None:
     """Explicitly add the model-turn failure audit event to one v3 archive.
 
@@ -76,6 +370,49 @@ def migrate_model_turn_event_schema(database_path: Path) -> None:
         integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
         if integrity != "ok":
             raise MigrationError("model-turn event migration failed integrity check")
+        connection.commit()
+    except BaseException:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
+
+
+def migrate_phrase_review_context_schema(database_path: Path) -> None:
+    """Explicitly add the nullable frozen phrase-review context column.
+
+    Existing learning items remain valid legacy items until their context is
+    safely backfilled from an exact source. This migration changes only the
+    schema; it never invents context or rewrites review facts.
+    """
+
+    path = Path(database_path)
+    connection = sqlite3.connect(path)
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("BEGIN IMMEDIATE")
+        tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        if "learning_items" not in tables:
+            raise MigrationError("learning items table is missing")
+        columns = {row[1] for row in connection.execute("PRAGMA table_info(learning_items)")}
+        if "review_context_json" in columns:
+            raise MigrationError("phrase review context schema is already migrated")
+        before = [tuple(row) for row in connection.execute(
+            "SELECT learning_item_id, material_id, item_order, reference_text, meaning_zh, review_stage, next_review_at, completed_at, revision, created_at, updated_at FROM learning_items ORDER BY learning_item_id"
+        )]
+        connection.execute(
+            "ALTER TABLE learning_items ADD COLUMN review_context_json TEXT CHECK (review_context_json IS NULL OR json_valid(review_context_json))"
+        )
+        after = [tuple(row) for row in connection.execute(
+            "SELECT learning_item_id, material_id, item_order, reference_text, meaning_zh, review_stage, next_review_at, completed_at, revision, created_at, updated_at FROM learning_items ORDER BY learning_item_id"
+        )]
+        if before != after:
+            raise MigrationError("phrase review context migration changed learning facts")
+        if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+            raise MigrationError("phrase review context migration introduced a foreign-key violation")
+        if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+            raise MigrationError("phrase review context migration failed integrity check")
         connection.commit()
     except BaseException:
         connection.rollback()

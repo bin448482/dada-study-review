@@ -23,6 +23,10 @@ class ReviewTurnDelivery:
     handled: bool
     reply_text: str | None = None
     no_due_item: bool = False
+    question_mode: str | None = None
+    question_json: dict[str, str] | None = None
+    progress_text: str | None = None
+    speech_text: str | None = None
 
 
 @dataclass(frozen=True)

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Iterable
 
+from v3_workflow.review_context import ReviewContextError, validate_review_context
+
 from .entry_turn import EntryAudit, EntryMaterial, EntryStateMachineResult, MaterialAudit, ReentryRequest
 
 
@@ -123,13 +125,22 @@ def _entry_audit(value: Any, result_version: int) -> EntryAudit:
             raise ContractError("entry material needs_parent_review must be boolean")
         if not isinstance(material["items"], list) or not material["items"]:
             raise ContractError("entry material must contain learning items")
-        items: list[dict[str, str | None]] = []
+        items: list[dict[str, Any]] = []
         for raw_item in material["items"]:
-            item = _exact_mapping(raw_item, {"reference_text", "meaning_zh"}, "learning item")
+            item_fields = {"reference_text", "meaning_zh"}
+            if result_version >= 3 and unit_type == "phrase":
+                item_fields.add("review_context")
+            item = _exact_mapping(raw_item, item_fields, "learning item")
             meaning = item["meaning_zh"]
             if meaning is not None:
                 meaning = _required_text(meaning, "learning item meaning_zh")
-            items.append({"reference_text": _required_text(item["reference_text"], "learning item reference_text"), "meaning_zh": meaning})
+            normalized_item: dict[str, Any] = {"reference_text": _required_text(item["reference_text"], "learning item reference_text"), "meaning_zh": meaning}
+            if result_version >= 3 and unit_type == "phrase":
+                try:
+                    normalized_item["review_context"] = validate_review_context(item["review_context"])
+                except ReviewContextError as exc:
+                    raise ContractError(str(exc)) from exc
+            items.append(normalized_item)
         needs_parent_review = material["needs_parent_review"]
         materials.append(
             EntryMaterial(
@@ -150,7 +161,7 @@ def _entry_audit(value: Any, result_version: int) -> EntryAudit:
             unit_type = _enum(unit_type, ("word", "phrase", "sentence"), "re-entry unit type")
         reentry_requests.append(ReentryRequest(guidance=_required_text(request["guidance"], "re-entry guidance"), unit_type=unit_type))
     resolved_ids: tuple[str, ...] = ()
-    if result_version == 2:
+    if result_version in (2, 3):
         raw_ids = data["resolved_reentry_request_ids"]
         if not isinstance(raw_ids, list):
             raise ContractError("resolved re-entry request ids must be an array")
@@ -164,10 +175,10 @@ def _entry_audit(value: Any, result_version: int) -> EntryAudit:
 
 
 def validate_entry_state_machine_result(value: Any) -> EntryStateMachineResult:
-    """Validate compatible v1/v2 results without making an English decision."""
+    """Validate compatible Entry results without making an English decision."""
 
     envelope = _exact_mapping(value, {"contract_name", "contract_version", "data"}, "state machine result envelope")
-    if envelope["contract_name"] != "dada.entry_state_machine_result" or envelope["contract_version"] not in (1, 2):
+    if envelope["contract_name"] != "dada.entry_state_machine_result" or envelope["contract_version"] not in (1, 2, 3):
         raise ContractError("state machine result contract is unsupported")
     version = envelope["contract_version"]
     data = envelope["data"]

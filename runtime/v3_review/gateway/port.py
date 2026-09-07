@@ -8,7 +8,11 @@ from ..contracts.review_turn import PreparedReviewGatewayRequest, ReviewGatewayE
 
 
 class GatewayError(RuntimeError):
-    pass
+    """A fixed provider call failed without exposing provider response content."""
+
+    def __init__(self, message: str, reason_code: str = "provider_failed") -> None:
+        super().__init__(message)
+        self.reason_code = reason_code
 
 
 class ReviewModelGateway(Protocol):

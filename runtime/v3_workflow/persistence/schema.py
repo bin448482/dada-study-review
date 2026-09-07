@@ -11,7 +11,7 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS workflows (
   workflow_id TEXT PRIMARY KEY,
   external_session_id TEXT NOT NULL,
-  workflow_type TEXT NOT NULL CHECK (workflow_type IN ('entry', 'review')),
+  workflow_type TEXT NOT NULL CHECK (workflow_type IN ('entry', 'review', 'dialogue')),
   phase TEXT NOT NULL CHECK (phase IN ('active', 'paused_for_entry', 'closed')),
   learning_item_id TEXT REFERENCES learning_items(learning_item_id),
   question_sequence INTEGER NOT NULL DEFAULT 0 CHECK (question_sequence >= 0),
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS workflows (
   started_at TEXT NOT NULL,
   paused_at TEXT,
   closed_at TEXT,
-  CHECK ((workflow_type = 'entry' AND learning_item_id IS NULL) OR (workflow_type = 'review' AND learning_item_id IS NOT NULL)),
+  CHECK ((workflow_type IN ('entry', 'dialogue') AND learning_item_id IS NULL) OR (workflow_type = 'review' AND learning_item_id IS NOT NULL)),
   CHECK (workflow_type = 'review' OR (question_sequence = 0 AND locked_question_mode IS NULL AND locked_question_json IS NULL AND locked_item_revision IS NULL AND locked_at IS NULL)),
   CHECK ((locked_question_mode IS NULL AND locked_question_json IS NULL AND locked_item_revision IS NULL AND locked_at IS NULL) OR (locked_question_mode IS NOT NULL AND locked_question_json IS NOT NULL AND locked_item_revision IS NOT NULL AND locked_at IS NOT NULL)),
   CHECK (locked_question_mode IS NULL OR question_sequence > 0),
@@ -38,7 +38,11 @@ CREATE TABLE IF NOT EXISTS workflow_log_events (
     'internal_reasoning_unavailable', 'tool_call', 'tool_result', 'llm_response',
     'model_turn_attempt_failed',
     'assistant_response', 'state_transition', 'reentry_requested', 'reentry_resolved',
-    'question_locked', 'question_released', 'schedule_applied', 'material_archived'
+    'question_locked', 'question_released', 'schedule_applied', 'material_archived',
+    'dialogue_turn_evaluated', 'dialogue_capture_committed', 'dialogue_wrapping_started',
+    'dialogue_batch_ready', 'unit_course_passed', 'dialogue_round_planned',
+    'dialogue_question_intent_used', 'dialogue_progress_checkpoint', 'dialogue_round_completed',
+    'dialogue_target_reopened'
   )),
   related_event_id TEXT REFERENCES workflow_log_events(event_id),
   payload_json TEXT NOT NULL CHECK (json_valid(payload_json)),
@@ -67,6 +71,7 @@ CREATE TABLE IF NOT EXISTS learning_items (
   item_order INTEGER NOT NULL CHECK (item_order > 0),
   reference_text TEXT NOT NULL,
   meaning_zh TEXT,
+  review_context_json TEXT CHECK (review_context_json IS NULL OR json_valid(review_context_json)),
   review_stage INTEGER CHECK (review_stage >= 0),
   next_review_at TEXT,
   completed_at TEXT,
@@ -89,6 +94,46 @@ CREATE TABLE IF NOT EXISTS review_queue_items (
   CHECK ((status = 'completed' AND completed_at IS NOT NULL) OR (status <> 'completed' AND completed_at IS NULL))
 );
 
+CREATE TABLE IF NOT EXISTS dialogue_workflow_state (
+  workflow_id TEXT PRIMARY KEY REFERENCES workflows(workflow_id),
+  unit_id TEXT NOT NULL,
+  unit_version INTEGER NOT NULL CHECK (unit_version > 0),
+  unit_content_hash TEXT NOT NULL,
+  current_scenario_id TEXT NOT NULL,
+  current_target_id TEXT NOT NULL,
+  current_difficulty_level INTEGER NOT NULL CHECK (current_difficulty_level BETWEEN 0 AND 4),
+  pending_repetition_target_id TEXT,
+  captured_count INTEGER NOT NULL DEFAULT 0 CHECK (captured_count >= 0),
+  subphase TEXT NOT NULL CHECK (subphase IN ('normal', 'wrapping_up'))
+);
+
+CREATE TABLE IF NOT EXISTS dialogue_round_plans (
+  workflow_id TEXT PRIMARY KEY REFERENCES workflows(workflow_id),
+  plan_id TEXT NOT NULL UNIQUE,
+  plan_json TEXT NOT NULL CHECK (json_valid(plan_json)),
+  current_step_index INTEGER NOT NULL DEFAULT 0 CHECK (current_step_index >= 0),
+  content_turn_count INTEGER NOT NULL DEFAULT 0 CHECK (content_turn_count >= 0 AND content_turn_count <= 12),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'closed_without_completion'))
+);
+
+CREATE TABLE IF NOT EXISTS dialogue_review_batches (
+  batch_id TEXT PRIMARY KEY,
+  source_dialogue_workflow_id TEXT NOT NULL UNIQUE REFERENCES workflows(workflow_id),
+  created_at TEXT NOT NULL,
+  consumed_by_review_workflow_id TEXT UNIQUE REFERENCES workflows(workflow_id),
+  consumed_at TEXT,
+  CHECK ((consumed_by_review_workflow_id IS NULL AND consumed_at IS NULL) OR
+         (consumed_by_review_workflow_id IS NOT NULL AND consumed_at IS NOT NULL))
+);
+
+CREATE TABLE IF NOT EXISTS dialogue_review_batch_items (
+  batch_id TEXT NOT NULL REFERENCES dialogue_review_batches(batch_id),
+  queue_position INTEGER NOT NULL CHECK (queue_position > 0),
+  learning_item_id TEXT NOT NULL REFERENCES learning_items(learning_item_id),
+  PRIMARY KEY (batch_id, queue_position),
+  UNIQUE (batch_id, learning_item_id)
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS one_active_workflow_per_session
   ON workflows(external_session_id) WHERE phase = 'active';
 CREATE UNIQUE INDEX IF NOT EXISTS one_paused_review_per_session
@@ -99,6 +144,9 @@ CREATE INDEX IF NOT EXISTS workflow_log_events_by_workflow ON workflow_log_event
 CREATE INDEX IF NOT EXISTS workflow_learning_materials_by_status ON learning_materials(status, created_at);
 CREATE INDEX IF NOT EXISTS workflow_learning_items_due ON learning_items(next_review_at) WHERE review_stage IS NOT NULL AND completed_at IS NULL;
 CREATE INDEX IF NOT EXISTS review_queue_items_by_workflow_status ON review_queue_items(workflow_id, status, queue_position);
+CREATE INDEX IF NOT EXISTS dialogue_workflow_state_by_unit ON dialogue_workflow_state(unit_id, unit_version);
+CREATE INDEX IF NOT EXISTS dialogue_review_batches_unconsumed ON dialogue_review_batches(created_at) WHERE consumed_by_review_workflow_id IS NULL;
+CREATE INDEX IF NOT EXISTS dialogue_review_batch_items_by_batch ON dialogue_review_batch_items(batch_id, queue_position);
 """
 
 

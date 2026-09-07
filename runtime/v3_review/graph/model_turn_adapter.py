@@ -43,31 +43,48 @@ class ReviewModelTurnAdapter:
 
     def commit(self, result: Any, source_llm_response_event_id: str) -> ModelTurnCommit:
         if result.next_operation == "ask_question":
-            reply_text = render_locked_question(result.question_json or {})
+            speech_text = render_locked_question(result.question_json or {})
             if self._context.pending_feedback_text is not None:
-                reply_text = f"{self._context.pending_feedback_text}\n\n{reply_text}"
+                speech_text = f"{self._context.pending_feedback_text}\n\n{speech_text}"
                 self._context.pending_feedback_text = None
-            if self._mode in {"start_review", "next_question"}:
-                progress = self._repository.get_review_queue_progress(self._workflow_id)
-                reply_text = f"这轮有 {progress['total']} 题需要复习，现在还剩 {progress['remaining']} 题（含当前题）。\n\n{reply_text}"
+            progress = self._repository.get_review_queue_progress(self._workflow_id)
+            progress_text = (
+                f"这轮共 {progress['total']} 题，现在从第 1 题开始。"
+                if self._mode == "start_review"
+                else f"第 {progress['completed'] + 1} / {progress['total']} 题，还剩 {progress['remaining']} 题。"
+            )
+            reply_text = f"{progress_text}\n\n{speech_text}"
             _, event_id = self._repository.lock_review_question(
                 self._workflow_id, result.question_mode or "", result.question_json or {}, reply_text,
                 source_llm_response_event_id, self._created_at,
             )
-            return ModelTurnCommit(event_id, reply_text)
+            self._context.delivery.question_mode = result.question_mode
+            self._context.delivery.question_json = dict(result.question_json or {})
+            self._context.delivery.progress_text = progress_text
+            self._context.delivery.speech_text = speech_text
+            return ModelTurnCommit(event_id, speech_text)
         if result.next_operation == "continue_locked_question":
             event_id, reply_text = self._repository.continue_locked_question(
                 self._workflow_id, result.assistant_response or "", source_llm_response_event_id, self._created_at
             )
-            return ModelTurnCommit(event_id, reply_text)
+            review_context = self._repository.get_review_context(self._workflow_id)
+            if review_context["locked_question_mode"] is not None:
+                import json
+                self._context.delivery.question_mode = review_context["locked_question_mode"]
+                self._context.delivery.question_json = json.loads(review_context["locked_question_json"])
+            return ModelTurnCommit(event_id, _without_progress_prefix(reply_text))
         if result.next_operation == "complete_assessment":
+            progress_before = self._repository.get_review_queue_progress(self._workflow_id)
+            completion_progress_text = f"这轮 {progress_before['total']} 题已完成。"
+            completion_reply_text = f"{completion_progress_text}\n\n{result.assistant_response or ''}".rstrip()
             outcome = self._repository.apply_review_assessment(
                 self._workflow_id, assessment_data(result.assessment), self._context.policy,
-                result.assistant_response or "", source_llm_response_event_id, self._created_at,
+                completion_reply_text if progress_before["remaining"] == 1 else result.assistant_response or "", source_llm_response_event_id, self._created_at,
             )
             if outcome.has_next_item:
                 self._context.pending_feedback_text = result.assistant_response
                 return ModelTurnCommit(outcome.last_event_id, "", {"next_question": True})
+            self._context.delivery.progress_text = completion_progress_text
             return ModelTurnCommit(outcome.last_event_id, result.assistant_response or "")
         if result.requested_transition == "stop_review":
             event_id = self._repository.stop_review(self._workflow_id, result.assistant_response or "", self._created_at)
@@ -93,3 +110,14 @@ class ReviewModelTurnAdapter:
             self._workflow_id, "assistant_response", {"text": text}, self._created_at, require_active_type="review"
         )
         return ModelTurnCommit(event_id, text)
+
+
+def _without_progress_prefix(text: str) -> str:
+    """Remove only this workflow's program-owned progress line for replays."""
+
+    parts = text.split("\n\n")
+    return "\n\n".join(
+        part for part in parts
+        if not (part.startswith("这轮共 ") and part.endswith("现在从第 1 题开始。"))
+        and not (part.startswith("第 ") and " 题，还剩 " in part and part.endswith(" 题。"))
+    )

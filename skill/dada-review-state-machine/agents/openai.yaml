@@ -1,6 +1,6 @@
 interface:
   display_name: "Dada v3 复习状态机"
   short_description: "受控单题英文复习与结构化 assessment"
-  default_prompt: "Use $dada-review-state-machine only for a fixed dada.review_state_machine_turn v3 request."
+  default_prompt: "Use $dada-review-state-machine only for a fixed dada.review_state_machine_turn v5 request."
 policy:
   allow_implicit_invocation: false

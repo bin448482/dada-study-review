@@ -11,7 +11,7 @@ import unittest
 PROJECT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT / "runtime"))
 
-from v3_workflow.persistence.migration import MigrationError, migrate_entry_database, migrate_model_turn_event_schema
+from v3_workflow.persistence.migration import MigrationError, migrate_dialogue_target_identity_schema, migrate_entry_database, migrate_model_turn_event_schema, migrate_phrase_review_context_schema
 from v3_workflow.persistence.repository import RepositoryError, canonical_json
 from v3_workflow.persistence.v1_active_import import V1ActiveImportError, import_v1_active_materials, preview_v1_active_materials
 from v3_workflow.policy.review_schedule import PolicyError, ReviewSchedulePolicy
@@ -94,6 +94,36 @@ class MigrationAndPolicyTests(unittest.TestCase):
         self.assertIn('model_turn_attempt_failed', sql)
         with self.assertRaises(MigrationError):
             migrate_model_turn_event_schema(self.path)
+
+    def test_phrase_review_context_schema_migration_preserves_existing_items(self) -> None:
+        with sqlite3.connect(self.path) as connection:
+            connection.execute("CREATE TABLE learning_items(learning_item_id TEXT PRIMARY KEY, material_id TEXT NOT NULL, item_order INTEGER NOT NULL, reference_text TEXT NOT NULL, meaning_zh TEXT, review_stage INTEGER, next_review_at TEXT, completed_at TEXT, revision INTEGER NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)")
+            connection.execute("INSERT INTO learning_items VALUES ('item', 'material', 1, 'go to school', '去上学', 0, '2026-08-23T00:00:00Z', NULL, 1, '2026-08-23T00:00:00Z', '2026-08-23T00:00:00Z')")
+        migrate_phrase_review_context_schema(self.path)
+        with sqlite3.connect(self.path) as connection:
+            columns = {row[1] for row in connection.execute("PRAGMA table_info(learning_items)")}
+            row = connection.execute("SELECT reference_text, meaning_zh, review_context_json FROM learning_items").fetchone()
+        self.assertIn("review_context_json", columns)
+        self.assertEqual(row, ("go to school", "去上学", None))
+        with self.assertRaises(MigrationError):
+            migrate_phrase_review_context_schema(self.path)
+
+    def test_dialogue_target_identity_migration_preserves_events(self) -> None:
+        from v3_workflow.persistence.schema import DDL
+
+        with sqlite3.connect(self.path) as connection:
+            legacy_round_ddl = DDL.replace(",\n    'dialogue_target_reopened'", "")
+            connection.executescript(legacy_round_ddl)
+            connection.execute("INSERT INTO workflows(workflow_id, external_session_id, workflow_type, phase, started_at, closed_at) VALUES ('dialogue', 'child', 'dialogue', 'closed', '2026-08-23T00:00:00Z', '2026-08-23T00:01:00Z')")
+            connection.execute("INSERT INTO workflow_log_events(event_id, workflow_id, sequence_no, event_type, payload_json, created_at) VALUES ('event', 'dialogue', 1, 'system_prompt', ?, '2026-08-23T00:00:00Z')", (json.dumps({"contract_name": "dada.workflow_log_event", "contract_version": 1, "data": {"text": "x"}}),))
+        migrate_dialogue_target_identity_schema(self.path)
+        with sqlite3.connect(self.path) as connection:
+            sql = connection.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='workflow_log_events'").fetchone()[0]
+            row = connection.execute("SELECT event_id, event_type FROM workflow_log_events").fetchone()
+        self.assertIn("dialogue_target_reopened", sql)
+        self.assertEqual(row, ("event", "system_prompt"))
+        with self.assertRaises(MigrationError):
+            migrate_dialogue_target_identity_schema(self.path)
 
     def test_policy_decides_from_accuracy_and_rejects_overlap(self) -> None:
         policy = ReviewSchedulePolicy.from_mapping(

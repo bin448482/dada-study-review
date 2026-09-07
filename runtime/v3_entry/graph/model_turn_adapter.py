@@ -68,7 +68,10 @@ class EntryModelTurnAdapter:
             if outcome is None:
                 event_id = self._repository.commit_control_response(self._workflow_id, "现在还不能开始复习，请继续录入或稍后再试。", self._created_at)
                 return ModelTurnCommit(event_id, "现在还不能开始复习，请继续录入或稍后再试。")
-            return ModelTurnCommit(outcome.last_event_id, outcome.reply_text, {"switched_to_review": bool(getattr(outcome, "switched_to_review", True))})
+            metadata = {"switched_to_review": bool(getattr(outcome, "switched_to_review", True))}
+            if isinstance(getattr(outcome, "question_mode", None), str) and isinstance(getattr(outcome, "question_json", None), dict):
+                metadata["review_question"] = {"question_mode": outcome.question_mode, "question_json": dict(outcome.question_json)}
+            return ModelTurnCommit(outcome.last_event_id, outcome.reply_text, metadata)
         event_id, response_text = self._repository.commit_state_machine_result(
             self._workflow_id, self._source_child_event_id, result, self._created_at
         )

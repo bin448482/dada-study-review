@@ -50,8 +50,8 @@ class ModelTurnPipeline:
                     spec.created_at,
                 )
                 execution = adapter.execute(prepared)
-            except Exception:
-                if not self._record_failure(adapter, spec, "gateway", attempt):
+            except Exception as exc:
+                if not self._record_failure(adapter, spec, "gateway", attempt, getattr(exc, "reason_code", "provider_failed")):
                     return self._infrastructure_failure()
                 if attempt == 2:
                     return self._terminal(adapter, "gateway")
@@ -73,7 +73,7 @@ class ModelTurnPipeline:
                     raise ModelTurnContractError("state-machine model result may not include tools")
                 result = adapter.validate(execution.output, spec.turn)
             except Exception:
-                if not self._record_failure(adapter, spec, "contract", attempt):
+                if not self._record_failure(adapter, spec, "contract", attempt, "contract_rejected"):
                     return self._infrastructure_failure()
                 if attempt == 2:
                     return self._terminal(adapter, "contract")
@@ -87,7 +87,7 @@ class ModelTurnPipeline:
                 committed = adapter.commit(result, response_event_id)
                 return ModelTurnOutcome(True, False, False, committed.last_event_id, committed.reply_text, result, committed.metadata)
             except Exception:
-                if not self._record_failure(adapter, spec, "commit", attempt):
+                if not self._record_failure(adapter, spec, "commit", attempt, "contract_rejected"):
                     return self._infrastructure_failure()
                 if attempt == 2:
                     return self._terminal(adapter, "commit")
@@ -105,12 +105,11 @@ class ModelTurnPipeline:
             adapter.append_log_event("tool_result", tool_result, spec.created_at)
 
     @staticmethod
-    def _record_failure(adapter: ModelTurnAdapter, spec: ModelTurnSpec, failure_kind: FailureKind, attempt: int) -> bool:
+    def _record_failure(adapter: ModelTurnAdapter, spec: ModelTurnSpec, failure_kind: FailureKind, attempt: int, reason_code: str) -> bool:
         try:
             # Keep the existing coarse observability event useful to un-migrated
             # archives, then add the precise attempt event where supported.
-            reason = "provider_failed" if failure_kind == "gateway" else "contract_rejected"
-            adapter.append_log_event("internal_reasoning_unavailable", {"reason_code": reason}, spec.created_at)
+            adapter.append_log_event("internal_reasoning_unavailable", {"reason_code": reason_code}, spec.created_at)
             try:
                 adapter.append_log_event(
                     "model_turn_attempt_failed",

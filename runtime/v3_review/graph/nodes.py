@@ -14,10 +14,11 @@ from ..contracts.review_turn import ReviewMachineTurn
 from ..gateway.port import ReviewModelGateway
 from .model_turn_adapter import ReviewModelTurnAdapter
 from .state import ReviewGraphState, ReviewRuntimeContext
+from ..question_modes import select_question_mode
 
 
 TASK_NAME = "dada.review_state_machine_turn"
-TASK_VERSION = 3
+TASK_VERSION = 5
 
 
 def _context(runtime: Runtime[ReviewRuntimeContext]) -> ReviewRuntimeContext:
@@ -100,8 +101,8 @@ def _model_turn(repository: WorkflowRepository, workflow_id: str, child_event_id
         }
     return ReviewMachineTurn(
         TASK_NAME, TASK_VERSION, mode, "review_starting" if mode == "start_review" else ("review_next_question" if mode == "next_question" else "review_process_answer"), workflow_id,
-        {"learning_item_id": context["learning_item_id"], "reference_text": context["item_reference_text"], "meaning_zh": context["meaning_zh"], "revision": context["revision"], "unit_type": context["unit_type"]},
-        question_mode_selector(context["unit_type"], repository.list_review_question_modes(workflow_id)),
+            {"learning_item_id": context["learning_item_id"], "reference_text": context["item_reference_text"], "meaning_zh": context["meaning_zh"], "revision": context["revision"], "unit_type": context["unit_type"], "review_context": context.get("review_context")},
+        select_question_mode(context["unit_type"], repository.list_review_question_modes(workflow_id), question_mode_selector),
         current, locked, history, len(history) == 20,
     )
 
@@ -140,6 +141,19 @@ def review_recover(repository: WorkflowRepository):
         workflow_id = state.get("workflow_id")
         if workflow_id:
             context.delivery.handled = True
-            context.delivery.reply_text = repository.get_locked_question_delivery(workflow_id)
+            stored_reply = repository.get_locked_question_delivery(workflow_id)
+            review_context = repository.get_review_context(workflow_id)
+            if review_context["locked_question_mode"] is not None:
+                import json
+                context.delivery.question_mode = review_context["locked_question_mode"]
+                context.delivery.question_json = json.loads(review_context["locked_question_json"])
+                progress = repository.get_review_queue_progress(workflow_id)
+                context.delivery.progress_text = f"第 {progress['completed'] + 1} / {progress['total']} 题，还剩 {progress['remaining']} 题。"
+                first_prefix = f"这轮共 {progress['total']} 题，现在从第 1 题开始。\n\n"
+                next_prefix = f"{context.delivery.progress_text}\n\n"
+                context.delivery.reply_text = stored_reply.removeprefix(first_prefix).removeprefix(next_prefix)
+                context.delivery.speech_text = context.delivery.reply_text
+            else:
+                context.delivery.reply_text = stored_reply
         return {"node": "review_waiting_for_child", "recovery_required": False, "route": "terminal", "turn_mode": None}
     return node

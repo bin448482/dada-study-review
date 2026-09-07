@@ -16,10 +16,12 @@ SQLite is the authoritative business store. A deployment chooses its own protect
 | --- | --- | --- |
 | `dada.workflow_log_event` | v1 | Persisted event envelope |
 | `dada.entry_state_machine_turn` | v1 | Fixed Entry-model input |
-| `dada.entry_state_machine_result` | v2 | Entry-model structured result |
-| `dada.entry_audit` | v2 | Materials, learning items, and re-entry result |
-| `dada.review_state_machine_turn` | v3 | Fixed Review-model input |
-| `dada.review_state_machine_result` | v3 | Review question, assessment, or transition result |
+| `dada.entry_state_machine_result` | v3 | Entry-model structured result |
+| `dada.entry_audit` | v3 | Materials, learning items, and re-entry result |
+| `dada.review_state_machine_turn` | v5 | Fixed Review-model input |
+| `dada.review_state_machine_result` | v4 | Review question, assessment, or transition result |
 | `dada.review_assessment` | v1 | Accuracy and feedback used for program scheduling |
+| `dada.dialogue_state_machine_turn` | v1 | Fixed Dialogue-model input |
+| `dada.dialogue_state_machine_result` | v1 | Dialogue-model structured result |
 
 The program validates every result before it has business effect. Empty question prompts cannot be locked or delivered. A question lock and its visible delivery text are committed together; recovery replays that committed text rather than asking the model again. Checkpoint data is control-only and must not contain user content or credentials.

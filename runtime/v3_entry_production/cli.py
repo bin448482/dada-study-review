@@ -12,6 +12,7 @@ from v3_entry.contracts.entry_turn import AuthorizedEntryIngress
 from v3_review_production import ProductionGatewayConfig as ReviewGatewayConfig
 from v3_review_production import build_review_service
 from v3_review_production.gateway import UrllibBearerResponsesTransport as ReviewTransport
+from v3_review_production.tts import ReviewTtsConfig, TtsError, synthesize_review_delivery
 from v3_workflow.policy.review_schedule import ReviewSchedulePolicy
 
 from .gateway import ProductionGatewayConfig, UrllibBearerResponsesTransport
@@ -26,6 +27,7 @@ _REQUIRED_ENV = (
     "DADA_ENTRY_MODEL",
     "DADA_ENTRY_MODEL_ENDPOINT",
     "DADA_ENTRY_MODEL_API_STYLE",
+    "DADA_ENTRY_MODEL_USER_AGENT",
     "DADA_ENTRY_MODEL_API_KEY",
     "DADA_ENTRY_REVIEW_DEFINITION_DIR",
     "DADA_ENTRY_REVIEW_DEFINITION_DIGEST",
@@ -33,6 +35,7 @@ _REQUIRED_ENV = (
     "DADA_ENTRY_REVIEW_MODEL",
     "DADA_ENTRY_REVIEW_MODEL_ENDPOINT",
     "DADA_ENTRY_REVIEW_MODEL_API_STYLE",
+    "DADA_ENTRY_REVIEW_MODEL_USER_AGENT",
     "DADA_ENTRY_REVIEW_SCHEDULE_PATH",
     "DADA_REVIEW_MODEL_API_KEY",
 )
@@ -58,7 +61,7 @@ def _ingress(value: Any) -> AuthorizedEntryIngress:
 
 
 def run(value: Any) -> dict[str, object]:
-    environment = _required_environment()
+    environment = {**os.environ, **_required_environment()}
     archive_root = Path(environment["DADA_ENTRY_ARCHIVE_ROOT"]).resolve(strict=False)
     database_path = archive_root / "workflow-v3.sqlite3"
     policy = ReviewSchedulePolicy.from_file(Path(environment["DADA_ENTRY_REVIEW_SCHEDULE_PATH"]))
@@ -72,8 +75,9 @@ def run(value: Any) -> dict[str, object]:
             environment["DADA_ENTRY_REVIEW_MODEL_ENDPOINT"],
             120,
             environment["DADA_ENTRY_REVIEW_MODEL_API_STYLE"],
+            environment["DADA_ENTRY_REVIEW_MODEL_USER_AGENT"],
         ),
-        ReviewTransport(environment["DADA_REVIEW_MODEL_API_KEY"]),
+        ReviewTransport(environment["DADA_REVIEW_MODEL_API_KEY"], environment["DADA_ENTRY_REVIEW_MODEL_USER_AGENT"]),
         policy,
     )
     service = build_entry_service(
@@ -86,14 +90,25 @@ def run(value: Any) -> dict[str, object]:
             environment["DADA_ENTRY_MODEL_ENDPOINT"],
             120,
             environment["DADA_ENTRY_MODEL_API_STYLE"],
+            environment["DADA_ENTRY_MODEL_USER_AGENT"],
         ),
-        UrllibBearerResponsesTransport(environment["DADA_ENTRY_MODEL_API_KEY"]),
+        UrllibBearerResponsesTransport(environment["DADA_ENTRY_MODEL_API_KEY"], environment["DADA_ENTRY_MODEL_USER_AGENT"]),
         policy=policy,
         review_handoff=review_service,
     )
     try:
         delivery = service.handle(_ingress(value))
-        return {"ok": True, "handled": delivery.handled, "reply_text": delivery.reply_text}
+        media_path: str | None = None
+        try:
+            tts = ReviewTtsConfig.from_environment(environment)
+            if tts is not None:
+                generated = synthesize_review_delivery(
+                    tts, delivery.reply_text, delivery.review_question_mode, delivery.review_question_json, archive_root / "outbound-media"
+                )
+                media_path = None if generated is None else str(generated)
+        except (TtsError, ValueError, OSError):
+            media_path = None
+        return {"ok": True, "handled": delivery.handled, "reply_text": delivery.reply_text, "media_path": media_path}
     finally:
         service.close()
         review_service.close()
@@ -105,7 +120,7 @@ def main() -> int:
         result = run(json.loads(raw))
     except (ValueError, OSError, json.JSONDecodeError):
         # Never send provider details, credentials, paths, or exception text to the plugin or child.
-        result = {"ok": False, "handled": False, "reply_text": None}
+        result = {"ok": False, "handled": False, "reply_text": None, "media_path": None}
     sys.stdout.write(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 

@@ -125,6 +125,10 @@ def entry_process_turn(repository: EntryRepository, gateway: ModelGateway, pipel
             ModelTurnSpec(workflow_id, child_event_id, context.ingress.received_at, TASK_NAME, TASK_VERSION, turn), adapter
         )
         context.delivery.reply_text = outcome.reply_text
+        review_question = outcome.metadata.get("review_question") if outcome.metadata else None
+        if isinstance(review_question, dict) and isinstance(review_question.get("question_mode"), str) and isinstance(review_question.get("question_json"), dict):
+            context.delivery.review_question_mode = review_question["question_mode"]
+            context.delivery.review_question_json = dict(review_question["question_json"])
         return {
             "node": "entry_terminal" if outcome.metadata and outcome.metadata.get("switched_to_review") else "entry_waiting_for_child",
             "last_committed_event_id": outcome.last_event_id,

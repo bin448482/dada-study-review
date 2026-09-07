@@ -4,7 +4,7 @@ MIT-licensed reference implementation of a controlled English recitation entry a
 
 ## Included and excluded
 
-This release includes the reusable Python runtime, state-machine Skill definitions, review policies, generic OpenClaw inbound plugin source, and deterministic tests. It deliberately excludes learning archives, identities, credentials, deployed Skill mirrors, real model evaluation configuration, delivery targets, and household-specific operations.
+This release includes the reusable Python runtime, Entry/Review/Dialogue state-machine Skill definitions, versioned review and Dialogue policies, a minimal public Unit package, generic OpenClaw inbound plugin source, and deterministic tests. It deliberately excludes learning archives, identities, credentials, deployed Skill mirrors, real model evaluation configuration, delivery targets, textbook maintenance inputs, and household-specific operations.
 
 The OpenClaw plugin is source code only. Configure it with your own static identity mapping, storage directory, model endpoint, definition digests, and protected credentials. This repository provides no production deployment command and never supplies those values.
 

@@ -77,6 +77,7 @@ def run(value: object) -> dict[str, object]:
                 "ok": True,
                 "handled": delivery.handled,
                 "reply_text": delivery.reply_text,
+                "progress_text": delivery.progress_text,
                 "no_due_item": delivery.no_due_item,
                 "replay": {"question_locked": event_types.count("question_locked"), "assistant_response": event_types.count("assistant_response")},
             }
@@ -88,7 +89,7 @@ def main() -> int:
     try:
         result = run(json.loads(sys.stdin.read()))
     except (ValueError, OSError, json.JSONDecodeError):
-        result = {"ok": False, "handled": False, "reply_text": None, "no_due_item": False}
+        result = {"ok": False, "handled": False, "reply_text": None, "progress_text": None, "no_due_item": False}
     sys.stdout.write(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 

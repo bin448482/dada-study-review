@@ -25,4 +25,4 @@ package-dir = {"" = "runtime"}
 
 [tool.setuptools.packages.find]
 where = ["runtime"]
-include = ["v3_entry*", "v3_review*", "v3_workflow*"]
+include = ["v3_dialogue*", "v3_entry*", "v3_review*", "v3_workflow*"]

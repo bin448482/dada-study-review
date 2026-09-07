@@ -25,9 +25,21 @@ class ReviewDeliveryBuffer:
     handled: bool = False
     reply_text: str | None = None
     no_due_item: bool = False
+    question_mode: str | None = None
+    question_json: dict[str, str] | None = None
+    progress_text: str | None = None
+    speech_text: str | None = None
 
     def delivery(self) -> ReviewTurnDelivery:
-        return ReviewTurnDelivery(self.handled, self.reply_text, self.no_due_item)
+        return ReviewTurnDelivery(
+            self.handled,
+            self.reply_text,
+            self.no_due_item,
+            self.question_mode,
+            None if self.question_json is None else dict(self.question_json),
+            self.progress_text,
+            self.speech_text,
+        )
 
 
 @dataclass

@@ -28,12 +28,13 @@ const config = {
   pythonBin: replayPython,
   runtimeRoot: resolve(projectRoot, "runtime"),
   archiveRoot: "/project/data/learning-archives",
-  entry: { definitionDirectory: "/definitions/entry", definitionDigest: "a".repeat(64), provider: "entry", model: "entry-model", endpoint: "https://provider.invalid/entry", apiStyle: "responses" },
-  review: { definitionDirectory: "/definitions/review", definitionDigest: "b".repeat(64), provider: "review", model: "review-model", endpoint: "https://provider.invalid/review", apiStyle: "responses", schedulePath: "/project/config/review-schedule.test.json" },
+  entry: { definitionDirectory: "/definitions/entry", definitionDigest: "a".repeat(64), provider: "entry", model: "entry-model", endpoint: "https://provider.invalid/entry", apiStyle: "responses", userAgent: "Mozilla/5.0" },
+  review: { definitionDirectory: "/definitions/review", definitionDigest: "b".repeat(64), provider: "review", model: "review-model", endpoint: "https://provider.invalid/review", apiStyle: "responses", schedulePath: "/project/config/review-schedule.test.json", userAgent: "Mozilla/5.0" },
+  dialogue: { definitionDirectory: "/definitions/dialogue", definitionDigest: "c".repeat(64), provider: "review", model: "review-model", endpoint: "https://provider.invalid/review", apiStyle: "responses", userAgent: "Mozilla/5.0", dialogueUnitId: "grade6-english-unit-1-school-life", unitPath: "/project/config/dialogue-units/grade6-english-unit-1-school-life/unit.v1.json", policyPath: "/project/config/dialogue-policy.json", reviewSchedulePath: "/project/config/review-schedule.test.json" },
 };
 const toolContext = { agentId: config.agentId, sessionKey: config.inboundBinding.sessionKey };
 const inboundContext = { channelId: config.inboundBinding.channelId, accountId: config.inboundBinding.accountId, conversationId: config.inboundBinding.conversationId };
-const lockedReply = "这轮有 1 题需要复习，现在还剩 1 题（含当前题）。\n\nI go to school.\n\n请说出这句话的中文意思。";
+const lockedReply = "这轮共 1 题，现在从第 1 题开始。\n\nI go to school.\n\n请说出这句话的中文意思。";
 
 async function toolResult(tool, action) {
   return JSON.parse((await tool.execute("replay-call", { action, payload: {} })).content[0].text);
@@ -55,7 +56,7 @@ async function runPythonReplay(_command, args, input) {
   });
 }
 
-test("RE-01 replay starts review and captures the full locked question", async () => {
+test("RE-01 replay starts review with program-owned text progress and locked question", async () => {
   const captured = [];
   const tool = createV3WorkflowArchiveTool({
     config, ...toolContext,
@@ -71,7 +72,7 @@ test("RE-01 replay starts review and captures the full locked question", async (
   captured.push(result.reply_text);
   assert.deepEqual(result, { started: true, mode: "review_active", reply_text: lockedReply });
   assert.deepEqual(captured, [lockedReply]);
-  assert.match(captured[0], /^这轮有 1 题需要复习，现在还剩 1 题（含当前题）。\n\nI go to school\.\n\n请说出/);
+  assert.match(captured[0], /^这轮共 1 题，现在从第 1 题开始。\n\nI go to school\.\n\n请说出/);
 });
 
 test("RE-02 replay leaves no workflow delivery when no due item exists", async () => {
@@ -86,7 +87,7 @@ test("RE-02 replay leaves no workflow delivery when no due item exists", async (
   assert.equal(released, 1);
 });
 
-test("RE-03 replay claims an active answer and sends only the Review reply", async () => {
+test("RE-03 replay claims an active answer and falls back to its Review text without audio", async () => {
   let invoked = 0;
   const result = await handleV3WorkflowInbound(config, { content: "我去上学。", timestamp: Date.UTC(2026, 7, 23) }, inboundContext, {
     readActivity: () => ({ ok: true, mode: "review" }),
