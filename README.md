@@ -8,41 +8,37 @@ This public repository contains reusable code and sanitized examples. It is not 
 
 ## Why This Product Exists
 
-Traditional vocabulary review and general-purpose chat each solve only part of the learning problem:
+Dada turns textbook language into usable language ability through three connected parts of the learning loop:
 
-- A word list can test recognition but does not show whether a child can use the language in a situation.
-- A textbook contains rich tasks, roles, questions, and information relationships, but those structures are easy to lose when converted into ad-hoc chat prompts.
-- A generic LLM can produce fluent conversation, but it may skip learning points, judge answers inconsistently, repeat questions, or claim that a workflow has started when it has not.
-- A child may leave halfway through a task. Without durable state, the next session cannot tell whether a question was answered, whether it was graded, or what should happen next.
-- Audio makes practice more natural, but a failed TTS request must not erase a committed answer or alter the learning schedule.
-
-Dada addresses these problems by making the learning loop explicit and by giving every part of the loop a clear owner.
+1. **Organize and use language in context**: Effective language learning is not just remembering text. It is a child's ability to organize language in a concrete situation, express an observable meaning, or complete a communication task. Dada uses contextualized practice to improve the child's ability to organize language and express it in use.
+2. **Consolidate learning through spaced review**: Dada uses the memory curve to schedule spaced review for words, phrases, and sentences, bringing each item back at an appropriate time so short-term memory can become long-term memory.
+3. **Stay closely connected to the English textbook**: Dada starts from textbook content, tasks, and language points, then brings them into contextual Dialogue and later review to deepen the child's understanding and memory of the textbook material.
 
 ## Product First Principles
 
 ### 1. Learning is demonstrated use, not text storage
 
-The smallest useful learning unit is an observable meaning or communication ability that a child can use in context. A target may be a `word`, `phrase`, `sentence`, or `function`. A target is not automatically complete because the child has seen it or repeated a string; the system evaluates whether the child answered the current question or completed the intended communication task.
+Effective language learning is not just remembering a string. It is a child's ability to organize language in a concrete situation, express a meaning, or complete a communication task. The system places abilities such as a `word`, `phrase`, `sentence`, or `function` target into a scenario and question intent, then records learning evidence based on whether the child expressed the intended meaning completely. The AI does not end practice after a first unsuccessful attempt: it can patiently explain, demonstrate, and invite repeated practice until the intended meaning is correctly expressed. Minor grammar, spelling, case, or preposition errors that do not change the meaning are not treated as reasons to force repetition.
 
 ### 2. Language judgment and business facts have different owners
 
-The program is responsible for facts that must be deterministic: which workflow is active, which Unit and step are frozen, which item is due, which question is locked, whether a revision matches, and which schedule is applied. The Skill is responsible for language judgment: how to ask a question, whether the answer carries the intended meaning, what needs correction, and how to encourage the child. The Skill cannot access SQLite, select queue items, change state, schedule a review, or archive data.
+AI is well suited to language judgment and patient feedback, but it should not decide the learning record on its own. The Skill is responsible for how to ask a question, whether the answer carries the intended meaning, what needs correction, and how to encourage the child. The program is responsible for saving learning facts, determining which items are due, freezing the review queue, locking questions, and applying a versioned memory-curve schedule. The Skill cannot access SQLite, select queue items, change state, schedule a review, or archive data.
 
 ### 3. Every learning point needs a traceable path
 
-Published content should be explainable from textbook page to teaching task, target, scenario, question intent, child evidence, and later review item. The system therefore keeps source references, semantic focus, evidence type, content slots, target identity, and audit events rather than treating a prompt as the whole curriculum.
+Every textbook learning point should answer: where did it come from, what should the child learn, how will it be practiced, whether the child has mastered it, and how will it be reviewed later? The system connects the textbook page, teaching task, target, scenario, question intent, child evidence, and later review item. It keeps source references, semantic focus, evidence type, content slots, target identity, and audit events rather than treating a temporary prompt as the whole curriculum.
 
 ### 4. Commit first, then deliver
 
-A visible reply or audio attachment is not the source of truth. The program commits the business fact and the response that belongs to it first; delivery happens afterward. Recovery re-sends committed content instead of calling the model again, inventing a new question, or changing the score.
+An answer the child has completed and a judgment the system has made must not be lost because message delivery failed. A visible reply or audio attachment is not the source of truth. The program commits the business fact and the response that belongs to it first; text or audio delivery happens afterward. If the child leaves or the system restarts, recovery re-sends committed content instead of calling the model again, inventing a new question, or changing the score.
 
 ### 5. Progress belongs to the child and target, not to a package version
 
-Unit package versions freeze the content used by one workflow. Stable `target_id` values preserve a child's mastery identity across package versions. A new display arrangement or review configuration must not reset existing mastery, while genuinely new content receives a new identity.
+The child's mastery of a language target should remain after textbook content is reorganized or a Unit package is upgraded. The system uses a stable `target_id` to record the long-term relationship between the child and the target. A new display arrangement or review configuration does not reset existing mastery, while genuinely new content receives a new identity.
 
 ### 6. Optional infrastructure must fail safely
 
-TTS, an LLM provider, OpenClaw, and messaging channels are adapters around the learning core. A provider failure may produce a fixed unavailable response or text fallback, but it must not create false success, mutate a score, skip a queue item, or write credentials into business state.
+TTS, an LLM provider, OpenClaw, and messaging channels are adapters around the learning core. When they fail, the system may return a fixed unavailable response or fall back from audio to text, but it must not create false success, mutate a score, skip a review item, or write credentials into the learning record. Infrastructure instability must not break the child's learning loop.
 
 ## Who It Helps
 
