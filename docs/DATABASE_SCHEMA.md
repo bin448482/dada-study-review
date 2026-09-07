@@ -7,14 +7,14 @@
 | Database | SQLite, one archive per configured deployment |
 | Audience | Runtime maintainers, database maintainers, testers, architecture reviewers |
 | Source of truth | `runtime/v3_workflow/persistence/schema.py`, `repository.py`, `migration.py`, workflow tests |
-| Related design | Private-source design baseline: `docs/database-design.md` |
+| Related design | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) |
 | Last reviewed | 2026-09-07 |
 
 ## Summary
 
 Dada stores business facts for Entry, Review, and Dialogue in one SQLite archive. The
-current implementation defines nine business tables. LangGraph's SQLite checkpointer
-adds its own infrastructure tables, normally `checkpoints` and `writes`; those tables
+current implementation defines nine business tables. The pinned LangGraph SQLite
+checkpointer adds the infrastructure tables `checkpoints` and `writes`; those tables
 are library-managed and are not Dada business facts.
 
 The public repository intentionally contains neither a learning archive nor a SQLite
@@ -40,6 +40,11 @@ English by comparing `reference_text` with a child answer.
 
 - The configured archive file is named `workflow-v3.sqlite3` and lives under the
   deployment's controlled archive root.
+- After installing dependencies, initialize a new archive with
+  `./scripts/initialize-database.py`. The default path is
+  `<workspace archive>/workflow-v3.sqlite3`; use `--database PATH` for an explicit
+  path. The command creates or verifies all nine business tables and the two pinned
+  LangGraph checkpoint tables, then checks SQLite integrity and foreign keys.
 - Entry, Review, and Dialogue share the same SQLite file and are isolated by the
   exact `external_session_id` supplied by the authorized host.
 - There is no database `child` table. Identity and authorization come from a static
@@ -52,8 +57,10 @@ English by comparing `reference_text` with a child answer.
   validators own the meaning of the JSON document.
 - Timestamps are normalized RFC 3339 UTC text. SQLite booleans are `INTEGER` values
   restricted to `0` and `1`.
-- API keys, cookies, authorization headers, passwords, session tokens, and provider
-  secrets must never be stored in the archive, checkpoints, logs, or fixtures.
+- API keys, cookies, authorization headers, passwords, provider session tokens, and
+  provider secrets must never be stored in the archive, checkpoints, logs, or
+  fixtures. `external_session_id` is different: it is the host-authorized logical
+  isolation key and is intentionally stored in `workflows`.
 
 ## Entity relationship diagram
 
@@ -182,9 +189,9 @@ CREATE TABLE IF NOT EXISTS learning_materials (
 );
 ```
 
-Only `active` material can supply due items to Review. Parent-required material stays
-`draft`; it is never placed in a Review queue. Archival is a retained state change,
-not deletion.
+Only `active` material with `needs_parent_review = 0` can supply due items to Review.
+Parent-required material stays `draft`; it is never placed in a Review queue.
+Archival is a retained state change, not deletion.
 
 ### `learning_items`
 
@@ -315,12 +322,46 @@ actual Review queue in `review_queue_items.item_revision_at_start`.
 
 ## Checkpointer tables
 
-The LangGraph SQLite checkpointer creates infrastructure tables, normally:
+The public package pins `langgraph-checkpoint-sqlite==3.1.1`. Its SQLite checkpointer
+creates the following infrastructure tables and sets SQLite to WAL mode. These are
+dependency-owned tables: a future dependency version may change them, so the pinned
+version must be updated together with this reference.
 
 | Table | Owner | Purpose |
 | --- | --- | --- |
-| `checkpoints` | LangGraph checkpointer | Graph state snapshots and recovery metadata |
-| `writes` | LangGraph checkpointer | Channel writes associated with checkpoints |
+| Table | Columns | Owner and purpose |
+| --- | --- | --- |
+| `checkpoints` | `thread_id TEXT NOT NULL`, `checkpoint_ns TEXT NOT NULL DEFAULT ''`, `checkpoint_id TEXT NOT NULL`, `parent_checkpoint_id TEXT`, `type TEXT`, `checkpoint BLOB`, `metadata BLOB`; primary key `(thread_id, checkpoint_ns, checkpoint_id)` | LangGraph checkpointer; Graph state snapshots and recovery metadata |
+| `writes` | `thread_id TEXT NOT NULL`, `checkpoint_ns TEXT NOT NULL DEFAULT ''`, `checkpoint_id TEXT NOT NULL`, `task_id TEXT NOT NULL`, `idx INTEGER NOT NULL`, `channel TEXT NOT NULL`, `type TEXT`, `value BLOB`; primary key `(thread_id, checkpoint_ns, checkpoint_id, task_id, idx)` | LangGraph checkpointer; channel writes associated with checkpoints |
+
+Equivalent current DDL from `SqliteSaver.setup()` is:
+
+```sql
+PRAGMA journal_mode=WAL;
+
+CREATE TABLE IF NOT EXISTS checkpoints (
+  thread_id TEXT NOT NULL,
+  checkpoint_ns TEXT NOT NULL DEFAULT '',
+  checkpoint_id TEXT NOT NULL,
+  parent_checkpoint_id TEXT,
+  type TEXT,
+  checkpoint BLOB,
+  metadata BLOB,
+  PRIMARY KEY (thread_id, checkpoint_ns, checkpoint_id)
+);
+
+CREATE TABLE IF NOT EXISTS writes (
+  thread_id TEXT NOT NULL,
+  checkpoint_ns TEXT NOT NULL DEFAULT '',
+  checkpoint_id TEXT NOT NULL,
+  task_id TEXT NOT NULL,
+  idx INTEGER NOT NULL,
+  channel TEXT NOT NULL,
+  type TEXT,
+  value BLOB,
+  PRIMARY KEY (thread_id, checkpoint_ns, checkpoint_id, task_id, idx)
+);
+```
 
 Their exact columns are dependency-owned and may vary by checkpointer version. Dada
 does not declare, mutate, or use them as the source of business truth. The runtime
@@ -442,8 +483,16 @@ against an unconfirmed path.
 ## Verification
 
 The public tree does not include a real archive, so its schema verification must use
-a temporary SQLite file. The following checks are the minimum evidence for the
-runtime schema:
+a temporary SQLite file. The following commands install the workspace, initialize a
+new archive, and run the deterministic public suite:
+
+```bash
+./scripts/bootstrap-workspace.sh
+./scripts/initialize-database.py
+pnpm run test:offline
+```
+
+The following checks are the minimum evidence for the runtime schema:
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py' -v
@@ -468,7 +517,7 @@ connection.close()
 ```
 
 Expected implementation evidence is nine Dada business tables, the dependency-owned
-checkpointer tables when a graph has run, an `ok` integrity check, no foreign-key
+checkpointer tables after the initializer or when a graph has run, an `ok` integrity check, no foreign-key
 violations, the two active-workflow uniqueness indexes, the current event-type
 checks, and the `review_context_json` JSON check. This is a checklist for an actual
 archive inspection, not a claim that the public repository contains one.
