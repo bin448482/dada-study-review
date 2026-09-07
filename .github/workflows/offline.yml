@@ -20,8 +20,7 @@ jobs:
           node-version: '22'
       - name: Install Python package
         run: |
-          python -m venv .venv
-          .venv/bin/pip install -e .
+          ./scripts/bootstrap-workspace.sh
       - name: Enable pnpm
         run: corepack enable
       - name: Verify public tree and offline behavior
