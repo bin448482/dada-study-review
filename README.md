@@ -75,3 +75,9 @@ This project is not a hosted service, a ready-to-run children's application, a s
 Do not commit learning archives, session identifiers, API keys, cookies, delivery targets, textbook images, private course workspaces, or model request/response logs. The runtime keeps credentials out of SQLite events and checkpoint state, but operators remain responsible for host security, backups, transport, and access control.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) for contribution and security guidance.
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Module design](docs/MODULE_DESIGN.md)
+- [Database schema](docs/DATABASE_SCHEMA.md)
