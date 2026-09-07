@@ -18,11 +18,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install Python package
+      - name: Enable pnpm
+        run: |
+          corepack enable
+      - name: Install workspace dependencies
         run: |
           ./scripts/bootstrap-workspace.sh
-      - name: Enable pnpm
-        run: corepack enable
       - name: Verify public tree and offline behavior
         run: |
           ./scripts/check-public-release.sh
