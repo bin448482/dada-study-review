@@ -35,10 +35,10 @@ Requirements: Python 3.12+, Node.js 22.12+ with `node:sqlite`, and pnpm 9+.
 
 The repository scripts use Bash. Linux and macOS can run them directly; Windows requires Git Bash or WSL. Native PowerShell users should provide equivalent wrappers while keeping the same workspace configuration model rather than hard-coding Windows or Unix paths.
 
+The project workspace is defined by `config/workspace.json` (copy `config/workspace.example.json`). It owns the virtual environment, Node dependencies, course inputs, archive, logs, temporary files, and generated outputs. External deployment targets are configured separately and are not part of the workspace.
+
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -e .
-pnpm install
+./scripts/bootstrap-workspace.sh
 pnpm run test:offline
 ```
 
@@ -52,7 +52,7 @@ The OpenClaw adapter is source code only. It requires a deployment-owned static 
 
 ## Boundaries
 
-This project is not a hosted service, a ready-to-run children’s application, a shared archive platform, a messaging bot deployment, or a model-weights distribution. Offline tests prove the reusable reference implementation only; they do not prove a live provider or channel deployment.
+This project is not a hosted service, a ready-to-run children's application, a shared archive platform, a messaging bot deployment, or a model-weights distribution. Offline tests prove the reusable reference implementation only; they do not prove a live provider or channel deployment.
 
 ## Security
 

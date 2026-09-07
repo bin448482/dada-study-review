@@ -1,4 +1,5 @@
 .venv/
+.dada-workspace/
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -7,6 +8,8 @@ data/
 .env
 .env.*
 !.env.example
+config/workspace.json
+config/deployment.json
 *.sqlite3
 *.sqlite3-*
 *.log

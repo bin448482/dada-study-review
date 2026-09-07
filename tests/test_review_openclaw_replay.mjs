@@ -13,7 +13,7 @@ import {
 } from "../runtime/inbound_v3_workflow_hook/index.mjs";
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const replayPython = resolve(projectRoot, ".venv", "bin", "python");
+const replayPython = process.env.DADA_PYTHON_BIN || resolve(projectRoot, ".dada-workspace", ".venv", "bin", "python");
 const replayFixture = resolve(projectRoot, "tests", "review_runtime", "replay_review_cli.py");
 
 const config = {
