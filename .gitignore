@@ -13,3 +13,4 @@ config/deployment.json
 *.sqlite3
 *.sqlite3-*
 *.log
+.claude-flow/
