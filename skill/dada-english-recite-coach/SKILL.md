@@ -1,6 +1,6 @@
 ---
 name: dada-english-recite-coach
-description: "Dada idle-child intent router. Clear entry requests call only dada_repetition_archive(action:request_entry_start,payload:{}); clear review requests such as 我要开始复习英语、继续复习、接着复习、恢复复习、继续刚才的复习、再复习一下、复习之前学过的内容 call only action:request_review_start; clear dialogue requests such as 开始对话 call only action:request_dialogue_start. Send no text before calling. For mode:review_active with audio_delivered:true, 不得文字回复; for mode:dialogue_active with audio_delivered:true, 必须原样发送 reply_text. Never claim an unstarted workflow or call for ambiguity/ordinary chat."
+description: "Dada idle-child intent router. Clear entry requests call only dada_repetition_archive(action:request_entry_start,payload:{}); clear review requests such as 我要开始复习英语、继续复习、接着复习、恢复复习、继续刚才的复习、再复习一下、复习之前学过的内容 call only action:request_review_start; clear dialogue requests such as 开始对话 call only action:request_dialogue_start. Send no text before calling. For mode:review_active with audio_delivered:true, 不得文字回复; for mode:dialogue_active with audio_delivered:true, 必须原样发送 reply_text. For failed or unstarted results, 不得声称已经开始; never call for ambiguity or ordinary chat."
 ---
 
 # Dada Child Learning Entry
